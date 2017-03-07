@@ -165,6 +165,12 @@ for imageset in ['trainval', 'test']:
 print 'generated lmdb files'
 
 
+# save ssd file
+output = open(os.path.join('builds', timestamp, 'ssd'+str(resize)+'.log'),'w')
+output.write('This model uses the SSD'+str(resize)+' architecture.')
+output.close()
+
+
 # start training
 if args.stop == False:
     if args.large:

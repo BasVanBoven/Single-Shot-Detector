@@ -104,15 +104,15 @@ train_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_trainval')
 # the database file for testing data
 test_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_test')
 # check which version of SSD we are running
-if isfile(rootdir, 'builds', builddir, 'ssd300x300.log'):
-    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == False)
+if os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd300.log')):
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == False)
     resize_width = 300
     resize_height = 300
     batch_size = 16
     test_batch_size = 4
     test_interval = 100
 else:
-    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == True)
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == True)
     # batch sizes are smaller to prevent memory overflow
     # not enough video memory to test during training, so never test
     resize_width = 512

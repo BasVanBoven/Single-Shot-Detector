@@ -20,6 +20,38 @@ parser.add_argument('builddir', help='build (timestamp only) that is to be train
 args = parser.parse_args()
 
 
+# global parameters
+# current working directory
+rootdir = os.getcwd()
+# caffe root directory
+rootcaffe = '/caffe'
+# determines which build to use
+builddir = args.builddir
+# directory change, meaning all paths after this need to be built from rootdir
+os.chdir(rootcaffe)
+# Caffe settings
+sys.path.insert(0, 'python')
+caffe.set_device(0)
+caffe.set_mode_gpu()
+# MatPlotLib settings
+plt.rcParams['figure.figsize'] = (10, 10)
+plt.rcParams['image.interpolation'] = 'nearest'
+plt.rcParams['image.cmap'] = 'gray'
+# open label file
+labelmap_file = label_map_file = os.path.join(rootdir, 'builds', builddir, 'includes', 'labelmap.prototxt')
+# load detection labels
+file = open(labelmap_file, 'r')
+labelmap = caffe_pb2.LabelMap()
+text_format.Merge(str(file.read()), labelmap)
+# check which version of SSD we are running
+if os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd300.log')):
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == False)
+    ssd_version = 300
+else:
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == True)
+    ssd_version = 512
+
+
 # extracts label names from label file
 def get_labelname(labelmap, labels):
     num_labels = len(labelmap.item)
@@ -39,9 +71,11 @@ def get_labelname(labelmap, labels):
 
 # finds most recent snapshot
 def get_iter_recent():
+    max_iter = 0
     for file in os.listdir(os.path.join(rootdir, 'builds', builddir, 'snapshots')):
       if file.endswith(".caffemodel"):
         basename = os.path.splitext(file)[0]
+        model_name = "ssd"+str(ssd_version)+"x"+str(ssd_version)
         iter = int(basename.split("{}_iter_".format(model_name))[1])
         if iter > max_iter:
           max_iter = iter
@@ -94,41 +128,10 @@ def process_image(path_input, path_output):
     plt.close('all')
 
 
-# global parameters
-# current working directory
-rootdir = os.getcwd()
-# caffe root directory
-rootcaffe = '/caffe'
-# determines which build to use
-builddir = args.builddir
-# directory change, meaning all paths after this need to be built from rootdir
-os.chdir(rootcaffe)
-# Caffe settings
-sys.path.insert(0, 'python')
-caffe.set_device(0)
-caffe.set_mode_gpu()
-# MatPlotLib settings
-plt.rcParams['figure.figsize'] = (10, 10)
-plt.rcParams['image.interpolation'] = 'nearest'
-plt.rcParams['image.cmap'] = 'gray'
 # paths to model files
 iter_recent = get_iter_recent()
-model_weights = os.path.join(rootdir, 'builds', builddir, 'snapshots', 'ssd'+ssd_version+'x'+ssd_version+'_iter_'+iter_recent+'.caffemodel')
-model_def = os.path.join(rootdir, 'builds', builddir, 'includes', 'ssd'+ssd_version, 'deploy.prototxt')
-labelmap_file = label_map_file = os.path.join(rootdir, 'builds', builddir, 'includes', 'labelmap.prototxt')
-# load detection labels
-file = open(labelmap_file, 'r')
-labelmap = caffe_pb2.LabelMap()
-text_format.Merge(str(file.read()), labelmap)
-# check which version of SSD we are running
-if isfile(rootdir, 'builds', builddir, 'ssd300x300.log'):
-    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == False)
-    ssd_version = str(300)
-else:
-    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == True)
-    ssd_version = str(512)
-
-
+model_weights = os.path.join(rootdir, 'builds', builddir, 'snapshots', 'ssd'+str(ssd_version)+'x'+str(ssd_version)+'_iter_'+str(iter_recent)+'.caffemodel')
+model_def = os.path.join(rootdir, 'builds', builddir, 'includes', 'ssd'+str(ssd_version), 'deploy.prototxt')
 # load Caffe net
 net = caffe.Net(model_def, model_weights, caffe.TEST)
 # input preprocessing: 'data' is the name of the input blob == net.inputs[0]
@@ -145,4 +148,12 @@ net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
 
 # process image
-process_image('/dockershare/ssd/temp/e3.jpg', rootdir+'/e3.png')
+for lp in range(100):
+    process_image('/dockershare/ssd/temp/e1.jpg', rootdir+'/output_test1.png')
+    print "IMAGE DONE"
+    process_image('/dockershare/ssd/temp/e2.jpg', rootdir+'/output_test2.png')
+    print "IMAGE DONE"
+    process_image('/dockershare/ssd/temp/e3.jpg', rootdir+'/output_test3.png')
+    print "IMAGE DONE"
+    process_image('/dockershare/ssd/temp/e4.jpg', rootdir+'/output_test4.png')
+    print "IMAGE DONE"
