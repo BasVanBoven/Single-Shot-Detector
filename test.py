@@ -3,48 +3,22 @@
 
 
 # imports
-import numpy as np
-import matplotlib.pyplot as plt
 import os
 import sys
 import caffe
 import argparse
+import numpy as np
+import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from google.protobuf import text_format
 from caffe.proto import caffe_pb2
 
 
-# global parameters
-plt.rcParams['figure.figsize'] = (10, 10)
-plt.rcParams['image.interpolation'] = 'nearest'
-plt.rcParams['image.cmap'] = 'gray'
-rootdir = os.getcwd()
-rootcaffe = '/caffe'
-builddir = '2017-03-06_15.50.07'
+# handle input arguments
+parser = argparse.ArgumentParser(description='Start training a Single Shot Detector.')
+parser.add_argument('builddir', help='build (timestamp only) that is to be trained')
+args = parser.parse_args()
 
-
-# directory change, meaning all paths after this need to be built from rootdir
-os.chdir(rootcaffe)
-# system settings
-sys.path.insert(0, 'python')
-caffe.set_device(0)
-caffe.set_mode_gpu()
-# paths to model files
-model_weights = os.path.join(rootdir, 'builds', builddir, 'snapshots', 'ssd512x512_iter_33436.caffemodel')
-model_def = os.path.join(rootdir, 'builds', builddir, 'includes', 'ssd512', 'deploy.prototxt')
-labelmap_file = label_map_file = os.path.join(rootdir, 'builds', builddir, 'includes', 'labelmap.prototxt')
-# load detection labels
-file = open(labelmap_file, 'r')
-labelmap = caffe_pb2.LabelMap()
-text_format.Merge(str(file.read()), labelmap)
-# check which version of SSD we are running
-if isfile(rootdir, 'builds', builddir, 'ssd300x300.log'):
-    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == False)
-    ssd_version = 300
-else:
-    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == True)
-    ssd_version = 512
-    
 
 # extracts label names from label file
 def get_labelname(labelmap, labels):
@@ -61,6 +35,17 @@ def get_labelname(labelmap, labels):
                 break
         assert found == True
     return labelnames
+
+
+# finds most recent snapshot
+def get_iter_recent():
+    for file in os.listdir(os.path.join(rootdir, 'builds', builddir, 'snapshots')):
+      if file.endswith(".caffemodel"):
+        basename = os.path.splitext(file)[0]
+        iter = int(basename.split("{}_iter_".format(model_name))[1])
+        if iter > max_iter:
+          max_iter = iter
+    return max_iter
 
 
 # processes an image through the SSD network and saves the output to a image file
@@ -109,6 +94,41 @@ def process_image(path_input, path_output):
     plt.close('all')
 
 
+# global parameters
+# current working directory
+rootdir = os.getcwd()
+# caffe root directory
+rootcaffe = '/caffe'
+# determines which build to use
+builddir = args.builddir
+# directory change, meaning all paths after this need to be built from rootdir
+os.chdir(rootcaffe)
+# Caffe settings
+sys.path.insert(0, 'python')
+caffe.set_device(0)
+caffe.set_mode_gpu()
+# MatPlotLib settings
+plt.rcParams['figure.figsize'] = (10, 10)
+plt.rcParams['image.interpolation'] = 'nearest'
+plt.rcParams['image.cmap'] = 'gray'
+# paths to model files
+iter_recent = get_iter_recent()
+model_weights = os.path.join(rootdir, 'builds', builddir, 'snapshots', 'ssd'+ssd_version+'x'+ssd_version+'_iter_'+iter_recent+'.caffemodel')
+model_def = os.path.join(rootdir, 'builds', builddir, 'includes', 'ssd'+ssd_version, 'deploy.prototxt')
+labelmap_file = label_map_file = os.path.join(rootdir, 'builds', builddir, 'includes', 'labelmap.prototxt')
+# load detection labels
+file = open(labelmap_file, 'r')
+labelmap = caffe_pb2.LabelMap()
+text_format.Merge(str(file.read()), labelmap)
+# check which version of SSD we are running
+if isfile(rootdir, 'builds', builddir, 'ssd300x300.log'):
+    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == False)
+    ssd_version = str(300)
+else:
+    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == True)
+    ssd_version = str(512)
+
+
 # load Caffe net
 net = caffe.Net(model_def, model_weights, caffe.TEST)
 # input preprocessing: 'data' is the name of the input blob == net.inputs[0]
@@ -120,7 +140,7 @@ transformer.set_raw_scale('data', 255)
 # the reference model has channels in BGR order instead of RGB
 transformer.set_channel_swap('data', (2,1,0))
 # set net to batch size of 1
-image_resize = 512
+image_resize = int(ssd_version)
 net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
 

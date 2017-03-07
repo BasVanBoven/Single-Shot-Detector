@@ -5,8 +5,6 @@
 # imports
 from __future__ import print_function
 import caffe
-from caffe.model_libs import *
-from google.protobuf import text_format
 import argparse
 import math
 import os
@@ -14,12 +12,13 @@ import shutil
 import stat
 import subprocess
 import sys
+from google.protobuf import text_format
+from caffe.model_libs import *
 
 
 # handle input arguments
 parser = argparse.ArgumentParser(description='Start training a Single Shot Detector.')
 parser.add_argument('builddir', help='build (timestamp only) that is to be trained')
-parser.add_argument('-l', '--large', default=False, action='store_true', help='use the SSD512 architecture')
 args = parser.parse_args()
 
 
@@ -104,8 +103,16 @@ remove_old_models = False
 train_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_trainval')
 # the database file for testing data
 test_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_test')
-# variables based on SSD size
-if args.large == True:
+# check which version of SSD we are running
+if isfile(rootdir, 'builds', builddir, 'ssd300x300.log'):
+    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == False)
+    resize_width = 300
+    resize_height = 300
+    batch_size = 16
+    test_batch_size = 4
+    test_interval = 100
+else:
+    assert(isfile(rootdir, 'builds', builddir, 'ssd512x512.log') == True)
     # batch sizes are smaller to prevent memory overflow
     # not enough video memory to test during training, so never test
     resize_width = 512
@@ -113,12 +120,6 @@ if args.large == True:
     batch_size = 4
     test_batch_size = 1
     test_interval = 999999999
-else:
-    resize_width = 300
-    resize_height = 300
-    batch_size = 16
-    test_batch_size = 4
-    test_interval = 100
 
 
 # batch sampler
@@ -258,6 +259,7 @@ test_transform_param = {
         }
 
 
+
 # if true, use batch norm for all newly added layers
 # currently only the non batch norm version has been tested
 use_batchnorm = False
@@ -269,9 +271,9 @@ else:
     # a learning rate for batch_size = 1, num_gpus = 1
     #base_lr = 0.00004
     base_lr = 0.000001
-
 # name of the model
 model_name = "ssd{}".format(resize)
+
 
 # directory which stores the model .prototxt file
 save_dir = os.path.join(rootdir, 'builds', builddir, 'includes', 'ssd'+str(resize_width))
@@ -286,6 +288,7 @@ if os.path.exists(os.path.join(rootdir, 'builds', builddir, 'output')) == False:
     os.makedirs(os.path.join(rootdir, 'builds', builddir, 'output'))
 output_result_dir = os.path.join(rootdir, 'builds', builddir, 'output')
 
+
 # model definition files
 train_net_file = "{}/train.prototxt".format(save_dir)
 test_net_file = "{}/test.prototxt".format(save_dir)
@@ -296,12 +299,14 @@ snapshot_prefix = "{}/{}".format(snapshot_dir, model_name)
 # job script path
 job_file = "{}/{}.sh".format(job_dir, model_name)
 
-# stores the test image names and sizes
+
+# test image names and sizes
 name_size_file = os.path.join(rootdir, 'builds', builddir, 'test_name_size.txt')
 # the pretrained model
 pretrain_model = os.path.join(rootdir, 'builds', builddir, 'includes', 'VGG_ILSVRC_16_layers_fc_reduced.caffemodel')
-# stores LabelMapItem
+# labels
 label_map_file = os.path.join(rootdir, 'builds', builddir, 'includes', 'labelmap.prototxt')
+
 
 # parameters of MultiBoxLoss
 share_location = True
@@ -333,6 +338,7 @@ multibox_loss_param = {
 loss_param = {
     'normalization': normalization_mode,
     }
+
 
 # parameters for generating priors
 # minimum dimension of input image
@@ -367,11 +373,13 @@ else:
 flip = True
 clip = False
 
+
 # solver parameters
 # defining which GPUs to use
 gpus = "0,1,2,3"
 gpulist = gpus.split(",")
 num_gpus = len(gpulist)
+
 
 # divide the mini-batch to different GPUs
 accum_batch_size = batch_size
@@ -385,6 +393,8 @@ if num_gpus > 0:
   solver_mode = P.Solver.GPU
   device_id = int(gpulist[0])
 
+
+# perform normalisation
 if normalization_mode == P.Loss.NONE:
   base_lr /= batch_size_per_device
 elif normalization_mode == P.Loss.VALID:
@@ -394,11 +404,14 @@ elif normalization_mode == P.Loss.FULL:
   # TODO(weiliu89): estimate the exact # of priors
   base_lr *= 2000.
 
+
 # evaluate on whole test set
 # ideally test_batch_size should be divisible by num_test_image,
 # otherwise mAP will be slightly off the true value
 test_iter = int(math.ceil(float(num_test_image) / test_batch_size))
 
+
+# define solver object
 solver_param = {
     # train parameters
     'base_lr': base_lr,
@@ -425,6 +438,7 @@ solver_param = {
     'test_initialization': False,
     }
 
+
 # parameters for generating detection output
 det_out_param = {
     'num_classes': num_classes,
@@ -444,6 +458,7 @@ det_out_param = {
     'code_type': code_type,
     }
 
+
 # parameters for evaluating detection results
 det_eval_param = {
     'num_classes': num_classes,
@@ -452,6 +467,7 @@ det_eval_param = {
     'evaluate_difficult_gt': False,
     'name_size_file': name_size_file,
     }
+
 
 # hopefully you don't need to change the following
 # check file
@@ -463,22 +479,21 @@ make_if_not_exist(save_dir)
 make_if_not_exist(job_dir)
 make_if_not_exist(snapshot_dir)
 
+
 # create train net
 net = caffe.NetSpec()
 net.data, net.label = CreateAnnotatedDataLayer(train_data, batch_size=batch_size_per_device,
         train=True, output_label=True, label_map_file=label_map_file,
         transform_param=train_transform_param, batch_sampler=batch_sampler)
-
 VGGNetBody(net, from_layer='data', fully_conv=True, reduced=True, dilated=True,
     dropout=False)
-
 AddExtraLayers(net, use_batchnorm, lr_mult=lr_mult)
-
 mbox_layers = CreateMultiBoxHead(net, data_layer='data', from_layers=mbox_source_layers,
         use_batchnorm=use_batchnorm, min_sizes=min_sizes, max_sizes=max_sizes,
         aspect_ratios=aspect_ratios, steps=steps, normalizations=normalizations,
         num_classes=num_classes, share_location=share_location, flip=flip, clip=clip,
         prior_variance=prior_variance, kernel_size=3, pad=1, lr_mult=lr_mult)
+
 
 # create the MultiBoxLossLayer
 name = "mbox_loss"
@@ -490,25 +505,21 @@ net[name] = L.MultiBoxLoss(*mbox_layers, multibox_loss_param=multibox_loss_param
 with open(train_net_file, 'w') as f:
     print('name: "{}_train"'.format(model_name), file=f)
     print(net.to_proto(), file=f)
-#shutil.copy(train_net_file, job_dir)
+
 
 # create test net
 net = caffe.NetSpec()
 net.data, net.label = CreateAnnotatedDataLayer(test_data, batch_size=test_batch_size,
         train=False, output_label=True, label_map_file=label_map_file,
         transform_param=test_transform_param)
-
 VGGNetBody(net, from_layer='data', fully_conv=True, reduced=True, dilated=True,
     dropout=False)
-
 AddExtraLayers(net, use_batchnorm, lr_mult=lr_mult)
-
 mbox_layers = CreateMultiBoxHead(net, data_layer='data', from_layers=mbox_source_layers,
         use_batchnorm=use_batchnorm, min_sizes=min_sizes, max_sizes=max_sizes,
         aspect_ratios=aspect_ratios, steps=steps, normalizations=normalizations,
         num_classes=num_classes, share_location=share_location, flip=flip, clip=clip,
         prior_variance=prior_variance, kernel_size=3, pad=1, lr_mult=lr_mult)
-
 conf_name = "mbox_conf"
 if multibox_loss_param["conf_loss_type"] == P.MultiBoxLoss.SOFTMAX:
   reshape_name = "{}_reshape".format(conf_name)
@@ -522,18 +533,16 @@ elif multibox_loss_param["conf_loss_type"] == P.MultiBoxLoss.LOGISTIC:
   sigmoid_name = "{}_sigmoid".format(conf_name)
   net[sigmoid_name] = L.Sigmoid(net[conf_name])
   mbox_layers[1] = net[sigmoid_name]
-
 net.detection_out = L.DetectionOutput(*mbox_layers,
     detection_output_param=det_out_param,
     include=dict(phase=caffe_pb2.Phase.Value('TEST')))
 net.detection_eval = L.DetectionEvaluate(net.detection_out, net.label,
     detection_evaluate_param=det_eval_param,
     include=dict(phase=caffe_pb2.Phase.Value('TEST')))
-
 with open(test_net_file, 'w') as f:
     print('name: "{}_test"'.format(model_name), file=f)
     print(net.to_proto(), file=f)
-#shutil.copy(test_net_file, job_dir)
+
 
 # create deploy net
 # remove the first and last layer from test net
@@ -548,7 +557,7 @@ with open(deploy_net_file, 'w') as f:
     net_param.input_shape.extend([
         caffe_pb2.BlobShape(dim=[1, 3, resize_height, resize_width])])
     print(net_param, file=f)
-#shutil.copy(deploy_net_file, job_dir)
+
 
 # create solver
 solver = caffe_pb2.SolverParameter(
@@ -559,7 +568,7 @@ solver = caffe_pb2.SolverParameter(
 
 with open(solver_file, 'w') as f:
     print(solver, file=f)
-#shutil.copy(solver_file, job_dir)
+
 
 max_iter = 0
 # find most recent snapshot
@@ -569,12 +578,10 @@ for file in os.listdir(snapshot_dir):
     iter = int(basename.split("{}_iter_".format(model_name))[1])
     if iter > max_iter:
       max_iter = iter
-
 train_src_param = '--weights="{}" \\\n'.format(pretrain_model)
 if resume_training:
   if max_iter > 0:
     train_src_param = '--snapshot="{}_iter_{}.solverstate" \\\n'.format(snapshot_prefix, max_iter)
-
 if remove_old_models:
   # remove any snapshots smaller than max_iter
   for file in os.listdir(snapshot_dir):
@@ -589,6 +596,7 @@ if remove_old_models:
       if max_iter > iter:
         os.remove("{}/{}".format(snapshot_dir, file))
 
+
 # create job file
 with open(job_file, 'w') as f:
   f.write('cd {}\n'.format(rootcaffe))
@@ -600,9 +608,11 @@ with open(job_file, 'w') as f:
   else:
     f.write('2>&1 | tee {}/{}.log\n'.format(job_dir, model_name))
 
+
 # copy the python script to job_dir
 py_file = os.path.abspath(__file__)
 shutil.copy(py_file, job_dir)
+
 
 # run the job
 os.chmod(job_file, stat.S_IRWXU)
