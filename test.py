@@ -125,6 +125,7 @@ def process_image(path_input, path_output):
         currentAxis.text(xmin, ymin, display_txt, bbox={'facecolor':color, 'alpha':0.5})
     # save output and close all open figures
     plt.savefig(path_output, bbox_inches='tight')
+    print ('Processed figure '+path_input)
     plt.close('all')
 
 
@@ -147,13 +148,15 @@ image_resize = int(ssd_version)
 net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
 
-# process image
-for lp in range(100):
-    process_image('/dockershare/ssd/temp/e1.jpg', rootdir+'/output_test1.png')
-    print "IMAGE DONE"
-    process_image('/dockershare/ssd/temp/e2.jpg', rootdir+'/output_test2.png')
-    print "IMAGE DONE"
-    process_image('/dockershare/ssd/temp/e3.jpg', rootdir+'/output_test3.png')
-    print "IMAGE DONE"
-    process_image('/dockershare/ssd/temp/e4.jpg', rootdir+'/output_test4.png')
-    print "IMAGE DONE"
+# perform all tests in testsets
+datacount = 0
+for root, dirs, files in os.walk(os.path.join(rootdir, 'testsets')):
+    for name in files:
+        name, ext = os.path.splitext(name)
+        if (ext.lower() == '.jpg'):
+            datacount += 1
+            output_dirs = root.split("testsets/")[1]
+            target_dir = os.path.join(root, '../..', 'builds', builddir, 'testsets_output', output_dirs)
+            if not os.path.exists(target_dir):
+                os.makedirs(target_dir)
+            process_image(os.path.join(root, name+ext), os.path.join(target_dir, name+'.png'))

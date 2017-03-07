@@ -1,7 +1,8 @@
 #!/usr/bin/python
 # setup.py - processes input data for training a Single Shot Detector
+
 # input: a frame folder containing jpg (arbitrary size) and xml files
-# to get caffe in your python path, do 'export PYTHONPATH=/caffe/python:$PYTHONPATH'
+# to get caffe in your python path, execute 'export PYTHONPATH=/caffe/python:$PYTHONPATH'
 
 
 # imports
