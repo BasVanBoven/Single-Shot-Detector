@@ -17,7 +17,7 @@ from caffe.model_libs import *
 
 
 # handle input arguments
-parser = argparse.ArgumentParser(description='Start training a Single Shot Detector.')
+parser = argparse.ArgumentParser(description='Train a Single Shot Detector.')
 parser.add_argument('builddir', help='build (timestamp only) that is to be trained')
 args = parser.parse_args()
 

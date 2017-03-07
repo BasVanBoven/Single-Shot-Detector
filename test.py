@@ -15,7 +15,7 @@ from caffe.proto import caffe_pb2
 
 
 # handle input arguments
-parser = argparse.ArgumentParser(description='Start training a Single Shot Detector.')
+parser = argparse.ArgumentParser(description='Test a Single Shot Detector.')
 parser.add_argument('builddir', help='build (timestamp only) that is to be trained')
 args = parser.parse_args()
 
