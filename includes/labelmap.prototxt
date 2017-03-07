@@ -1,0 +1,35 @@
+item {
+  name: "none_of_the_above"
+  label: 0
+  display_name: "background"
+}
+item {
+  name: "cabin"
+  label: 1
+  display_name: "cabin"
+}
+item {
+  name: "forearm"
+  label: 2
+  display_name: "forearm"
+}
+item {
+  name: "upperarm"
+  label: 3
+  display_name: "upperarm"
+}
+item {
+  name: "wheelbase"
+  label: 4
+  display_name: "wheelbase"
+}
+item {
+  name: "attachment-bucket"
+  label: 5
+  display_name: "attachment-bucket"
+}
+item {
+  name: "attachment-breaker"
+  label: 6
+  display_name: "attachment-breaker"
+}
