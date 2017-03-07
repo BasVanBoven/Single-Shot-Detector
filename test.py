@@ -1,5 +1,8 @@
 #!/usr/bin/python
+# train.py - tests a Single Shot Detector
 
+
+# imports
 import numpy as np
 import matplotlib.pyplot as plt
 import os
@@ -7,15 +10,14 @@ import sys
 import caffe
 import argparse
 import matplotlib.image as mpimg
-
 from google.protobuf import text_format
 from caffe.proto import caffe_pb2
 
+
+# global parameters
 plt.rcParams['figure.figsize'] = (10, 10)
 plt.rcParams['image.interpolation'] = 'nearest'
 plt.rcParams['image.cmap'] = 'gray'
-
-# Make sure that caffe is on the python path:
 rootdir = os.getcwd()
 rootcaffe = '/caffe'
 builddir = '2017-03-06_15.50.07'
@@ -123,3 +125,4 @@ for i in xrange(top_conf.shape[0]):
     currentAxis.text(xmin, ymin, display_txt, bbox={'facecolor':color, 'alpha':0.5})
 
 plt.savefig(rootdir+'/e4.png', bbox_inches='tight')
+plt.close('all')
