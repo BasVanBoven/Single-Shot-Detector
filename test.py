@@ -68,7 +68,7 @@ transformer.set_channel_swap('data', (2,1,0))  # the reference model has channel
 image_resize = 512
 net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
-image = caffe.io.load_image('/dockershare/ssd/temp/e4.jpg')
+image = caffe.io.load_image('/dockershare/ssd/temp/e3.jpg')
 plt.imshow(image)
 
 
@@ -124,5 +124,5 @@ for i in xrange(top_conf.shape[0]):
     currentAxis.add_patch(plt.Rectangle(*coords, fill=False, edgecolor=color, linewidth=2))
     currentAxis.text(xmin, ymin, display_txt, bbox={'facecolor':color, 'alpha':0.5})
 
-plt.savefig(rootdir+'/e4.png', bbox_inches='tight')
+plt.savefig(rootdir+'/e3.png', bbox_inches='tight')
 plt.close('all')
