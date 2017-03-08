@@ -1,4 +1,4 @@
-builds
-frames
-testsets
-temp
+builds/*
+frames/*
+testsets/*
+temp/*
