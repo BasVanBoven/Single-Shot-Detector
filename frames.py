@@ -26,8 +26,8 @@ for root, dirs, files in os.walk(args.target_dir):
         else:
             if (ext.lower().endswith(('.mp4', '.avi', '.mov'))):
                 # create directory if it does not exist
-                target_dir = root+'/'+name
+                target_dir = 'frames'+'/'+name
                 if not os.path.exists(target_dir):
                     os.makedirs(target_dir)
                 # call ffmpeg
-                os.system('ffmpeg -i "'+root+'/'+name+ext+'" -r 1.0 "'+root+'/'+name+'"/"'+name+'"_%4d.jpg')
+                os.system('ffmpeg -i "'+root+'/'+name+ext+'" -r 1 "'+'frames'+'/'+name+'"/"'+name+'"_%4d.jpg')

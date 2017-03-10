@@ -321,13 +321,11 @@ class MainWindow(QMainWindow, WindowMixin):
                 file=self.menu('&File'),
                 edit=self.menu('&Edit'),
                 view=self.menu('&View'),
-                help=self.menu('&Help'),
                 recentFiles=QMenu('Open &Recent'),
                 labelList=labelMenu)
 
         addActions(self.menus.file,
-                (open, opendir, openAnnotation, openPrevAnnotation, self.menus.recentFiles, save, saveAs, close, None, quit))
-        addActions(self.menus.help, (help,))
+                (opendir, openPrevAnnotation, save, close, None, quit))
         addActions(self.menus.view, (
             labels, None,
             hideAll, showAll, None,
@@ -344,7 +342,7 @@ class MainWindow(QMainWindow, WindowMixin):
 
         self.tools = self.toolbar('Tools')
         self.actions.beginner = (
-            open, opendir, openNextImg, openPrevImg, save, openPrevAnnotation, None, create, copy, delete, None,
+            opendir, openNextImg, openPrevImg, openPrevAnnotation, None, create, copy, delete, None,
             zoomIn, zoom, zoomOut, fitWindow, fitWidth)
 
         self.actions.advanced = (
@@ -949,6 +947,7 @@ class MainWindow(QMainWindow, WindowMixin):
                             self.errorMessage(u'No previous annotations found',
                                     u'The previous frames have no annotations or do not exist.')
                         else:
+                            self.setDirty()
                             self.loadPascalXMLByFilename(filename)
                             self.actions.save.setEnabled(True)
                     if file.endswith(".xml"):
@@ -1104,9 +1103,13 @@ class MainWindow(QMainWindow, WindowMixin):
         return not (self.dirty and not self.discardChangesDialog())
 
     def discardChangesDialog(self):
-        yes, no = QMessageBox.Yes, QMessageBox.No
-        msg = u'You have unsaved changes, proceed anyway?'
-        return yes == QMessageBox.warning(self, u'Attention', msg, yes|no)
+        #yes, no = QMessageBox.Yes, QMessageBox.No
+        #msg = u'You have unsaved changes, proceed anyway?'
+        #return yes == QMessageBox.warning(self, u'Attention', msg, yes|no)
+        if self.autoSaving is True and self.defaultSaveDir is not None:
+            if self.dirty is True and self.hasLabels():
+                self.saveFile()
+        return True
 
     def errorMessage(self, title, message):
         return QMessageBox.critical(self, title,
