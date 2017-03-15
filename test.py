@@ -45,11 +45,11 @@ labelmap = caffe_pb2.LabelMap()
 text_format.Merge(str(file.read()), labelmap)
 # check which version of SSD we are running
 if os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd300.log')):
-    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == False)
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd500.log')) == False)
     ssd_version = 300
 else:
-    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == True)
-    ssd_version = 512
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd500.log')) == True)
+    ssd_version = 500
 
 
 # extracts label names from label file
@@ -79,12 +79,16 @@ def get_iter_recent():
         iter = int(basename.split("{}_iter_".format(model_name))[1])
         if iter > max_iter:
           max_iter = iter
+          #max_iter = 50000
     return max_iter
 
 
 # processes an image through the SSD network and saves the output to a image file
 def process_image(path_input, path_output):
     image = caffe.io.load_image(path_input)
+    plt.imshow(image)
+    transformed_image = transformer.preprocess('data', image)
+    net.blobs['data'].data[...] = transformed_image
     # forward pass
     detections = net.forward()['detection_out']
     # parse the outputs

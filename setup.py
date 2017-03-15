@@ -48,7 +48,7 @@ sourcedir = 'frames'
 testratio = args.test
 # longest edge of image, usually 300 or 512 pixels
 if args.large == True:
-    resize = 512
+    resize = 500
 else:
     resize = 300
 
@@ -174,7 +174,4 @@ output.close()
 
 # start training
 if args.stop == False:
-    if args.large:
-        os.system('python '+rootdir+'/train.py '+timestamp+' -l')
-    else:
-        os.system('python '+rootdir+'/train.py '+timestamp)
+    os.system('python '+rootdir+'/train.py '+timestamp)
