@@ -117,9 +117,9 @@ else:
     # not enough video memory to test during training, so never test
     resize_width = 512
     resize_height = 512
-    batch_size = 4
-    test_batch_size = 1
-    test_interval = 999999999
+    batch_size = 8
+    test_batch_size = 2
+    test_interval = 100
 
 
 # batch sampler
