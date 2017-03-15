@@ -1,10 +1,10 @@
-name: "ssd500x500_deploy"
+name: "ssd512x512_deploy"
 input: "data"
 input_shape {
   dim: 1
   dim: 3
-  dim: 500
-  dim: 500
+  dim: 512
+  dim: 512
 }
 layer {
   name: "conv1_1"
@@ -1518,7 +1518,7 @@ layer {
     variance: 0.1
     variance: 0.2
     variance: 0.2
-    step: 500
+    step: 512
     offset: 0.5
   }
 }

@@ -1,4 +1,4 @@
-name: "ssd500x500_train"
+name: "ssd512x512_train"
 layer {
   name: "data"
   type: "AnnotatedData"
@@ -15,8 +15,8 @@ layer {
     resize_param {
       prob: 1
       resize_mode: WARP
-      height: 500
-      width: 500
+      height: 512
+      width: 512
       interp_mode: LINEAR
       interp_mode: AREA
       interp_mode: NEAREST
@@ -1647,7 +1647,7 @@ layer {
     variance: 0.1
     variance: 0.2
     variance: 0.2
-    step: 500
+    step: 512
     offset: 0.5
   }
 }

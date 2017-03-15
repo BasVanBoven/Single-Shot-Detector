@@ -45,11 +45,11 @@ labelmap = caffe_pb2.LabelMap()
 text_format.Merge(str(file.read()), labelmap)
 # check which version of SSD we are running
 if os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd300.log')):
-    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd500.log')) == False)
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == False)
     ssd_version = 300
 else:
-    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd500.log')) == True)
-    ssd_version = 500
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == True)
+    ssd_version = 512
 
 
 # extracts label names from label file
@@ -79,6 +79,7 @@ def get_iter_recent():
         iter = int(basename.split("{}_iter_".format(model_name))[1])
         if iter > max_iter:
           max_iter = iter
+          # ugly hack: hardcode the model iteration to use
           #max_iter = 50000
     return max_iter
 

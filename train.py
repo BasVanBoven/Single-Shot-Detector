@@ -105,18 +105,18 @@ train_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_trainval')
 test_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_test')
 # check which version of SSD we are running
 if os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd300.log')):
-    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd500.log')) == False)
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == False)
     resize_width = 300
     resize_height = 300
     batch_size = 16
     test_batch_size = 4
     test_interval = 100
 else:
-    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd500.log')) == True)
+    assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == True)
     # batch sizes are smaller to prevent memory overflow
     # not enough video memory to test during training, so never test
-    resize_width = 500
-    resize_height = 500
+    resize_width = 512
+    resize_height = 512
     batch_size = 4
     test_batch_size = 1
     test_interval = 999999999
@@ -376,7 +376,7 @@ clip = False
 
 # solver parameters
 # defining which GPUs to use
-gpus = "0,1,2,3"
+gpus = "0"
 gpulist = gpus.split(",")
 num_gpus = len(gpulist)
 
@@ -384,7 +384,7 @@ num_gpus = len(gpulist)
 # divide the mini-batch to different GPUs
 accum_batch_size = batch_size
 iter_size = accum_batch_size / batch_size
-solver_mode = P.Solver.CPU
+solver_mode = P.Solver.GPU
 device_id = 0
 batch_size_per_device = batch_size
 if num_gpus > 0:
@@ -422,7 +422,7 @@ solver_param = {
     'momentum': 0.9,
     'iter_size': iter_size,
     'max_iter': 120000,
-    'snapshot': 5000,
+    'snapshot': 10000,
     'display': 10,
     'average_loss': 10,
     'type': "SGD",

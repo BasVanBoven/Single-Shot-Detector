@@ -48,7 +48,7 @@ sourcedir = 'frames'
 testratio = args.test
 # longest edge of image, usually 300 or 512 pixels
 if args.large == True:
-    resize = 500
+    resize = 512
 else:
     resize = 300
 
