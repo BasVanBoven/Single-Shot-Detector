@@ -101,8 +101,7 @@ for name in files:
     name, ext = os.path.splitext(name)
     image = Image.open(os.path.join('builds', timestamp, 'trainval', 'image', name + '.jpg'))
     maxsize = (resize, resize)
-    #image.resize((int(oldwidth * crop), int(oldheight * crop)), Image.ANTIALIAS)
-    image.thumbnail(maxsize, PIL.Image.ANTIALIAS)
+    image = image.resize((int(int(oldwidth) * crop), int(int(oldheight) * crop)), Image.ANTIALIAS)
     image.save(os.path.join('builds', timestamp, 'trainval', 'image', name + '.jpg'))
 print 'done resizing all images (and annotations)'
 
