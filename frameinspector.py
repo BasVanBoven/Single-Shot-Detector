@@ -1,0 +1,113 @@
+#!/usr/bin/python
+# frameinspector.py - finds duplicate frames and frames without tags
+
+# input: a frame folder containing jpg (arbitrary size) and xml files
+# to get caffe in your python path, execute 'export PYTHONPATH=/caffe/python:$PYTHONPATH'
+
+
+# imports
+import argparse
+import math
+import os
+import shutil
+import stat
+import subprocess
+import sys
+import random
+import time
+import datetime
+import random
+import xml.etree.ElementTree as ET
+from shutil import copyfile
+from shutil import copytree
+from random import shuffle
+
+
+# handle input arguments
+parser = argparse.ArgumentParser(description='Process input data for training a Single Shot Detector.')
+parser.add_argument('sourcedir', help='directory that is to be processed')
+parser.add_argument('-p', '--pretend', default=False, action='store_true', help='disable write mode')
+args = parser.parse_args()
+
+
+# returns true if all bounding boxes are equal
+def equal_bbox(current_tree, previous_tree):
+    previous_root = previous_tree.getroot()
+    current_root = current_tree.getroot()
+    for original in current_root.findall('object'):
+        found = False
+        for match in previous_root.findall('object'):
+            if (
+                original.find('name').text == match.find('name').text and
+                original.find('bndbox').find('xmin').text == match.find('bndbox').find('xmin').text and
+                original.find('bndbox').find('xmax').text == match.find('bndbox').find('xmax').text and
+                original.find('bndbox').find('ymin').text == match.find('bndbox').find('ymin').text and
+                original.find('bndbox').find('ymax').text == match.find('bndbox').find('ymax').text
+            ):
+                found = True
+        if found == False:
+            # no similar object has been found for the original: frame is not a duplicate
+            return False
+    # all originals have a match: frame is a duplicate
+    return True
+
+
+# reset counters
+datacount = 0
+count_missinglabels = 0
+count_similar = 0
+count_cabin = 0
+count_wheelbase = 0
+count_forearm = 0
+count_upperarm = 0
+count_attachment_bucket = 0
+count_attachment_breaker = 0
+
+
+# walk through whole folder
+for root, dirs, files in sorted(os.walk(args.sourcedir)):
+    for name in sorted(files):
+        name, ext = os.path.splitext(name)
+        if ext.lower() == '.jpg':
+            datacount += 1
+            if os.path.exists(os.path.join(root, name + '.xml')) == False:
+                count_missinglabels += 1
+                print ('Image ' + os.path.join(root, name + '.jpg') + ' has no labels')
+            else:
+                current_tree = ET.parse(os.path.join(root, name + '.xml'))
+                if (datacount > 1 and equal_bbox(current_tree, previous_tree)):
+                    count_similar += 1
+                    print ('Image ' + os.path.join(root, name + '.jpg') + ' is similar to the previous frame')
+                else:
+                    # not similar
+                    current_root = current_tree.getroot()        
+                    for object in current_root.findall('object'):
+                        if object.find('name').text == 'cabin':
+                            count_cabin += 1
+                        elif object.find('name').text == 'wheelbase':
+                            count_wheelbase += 1
+                        elif object.find('name').text == 'forearm':
+                            count_forearm += 1
+                        elif object.find('name').text == 'upperarm':
+                            count_upperarm += 1
+                        elif object.find('name').text == 'attachment-bucket':
+                            count_attachment_bucket += 1
+                        elif object.find('name').text == 'attachment-breaker':
+                            count_attachment_breaker += 1
+        previous_tree = current_tree
+
+
+# print statistics
+print ''
+print ''
+print 'Scanned ' + str(datacount) + ' images:'
+print str(count_missinglabels) + ' missing labels'
+print str(count_similar) + ' similar frames'
+print ''
+print 'Tag count:'
+print str(count_cabin) + ' cabin'
+print str(count_wheelbase) + ' wheelbase'
+print str(count_forearm) + ' forearm'
+print str(count_upperarm) + ' upperarm'
+print str(count_attachment_bucket) + ' attachment-bucket'
+print str(count_attachment_breaker) + ' attachment-breaker'
