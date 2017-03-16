@@ -2,7 +2,6 @@
 # frameinspector.py - finds duplicate frames and frames without tags
 
 # input: a frame folder containing jpg (arbitrary size) and xml files
-# to get caffe in your python path, execute 'export PYTHONPATH=/caffe/python:$PYTHONPATH'
 
 
 # imports
@@ -64,6 +63,13 @@ count_attachment_bucket = 0
 count_attachment_breaker = 0
 
 
+# warn if running without pretend flag
+if (args.pretend == False):
+    answer = raw_input('Warning: running without the pretend flag. Continue (y/n)? ')
+    if (answer.lower() != 'y'):
+        exit()
+
+
 # walk through whole folder
 for root, dirs, files in sorted(os.walk(args.sourcedir)):
     for name in sorted(files):
@@ -73,14 +79,19 @@ for root, dirs, files in sorted(os.walk(args.sourcedir)):
             if os.path.exists(os.path.join(root, name + '.xml')) == False:
                 count_missinglabels += 1
                 print ('Image ' + os.path.join(root, name + '.jpg') + ' has no labels')
+                if (args.pretend == False):
+                    os.remove(os.path.join(root, name + '.jpg'))
             else:
                 current_tree = ET.parse(os.path.join(root, name + '.xml'))
                 if (datacount > 1 and equal_bbox(current_tree, previous_tree)):
                     count_similar += 1
                     print ('Image ' + os.path.join(root, name + '.jpg') + ' is similar to the previous frame')
+                    if (args.pretend == False):
+                        os.remove(os.path.join(root, name + '.jpg'))
+                        os.remove(os.path.join(root, name + '.xml'))
                 else:
                     # not similar
-                    current_root = current_tree.getroot()        
+                    current_root = current_tree.getroot()
                     for object in current_root.findall('object'):
                         if object.find('name').text == 'cabin':
                             count_cabin += 1
@@ -103,8 +114,12 @@ print ''
 print 'Scanned ' + str(datacount) + ' images:'
 print str(count_missinglabels) + ' missing labels'
 print str(count_similar) + ' similar frames'
+if (args.pretend):
+    print 'Run without the pretend flag (-p) to remove these images'
+else:
+    print 'These images and corresponding labels were removed'
 print ''
-print 'Tag count:'
+print '(Usable) tag count:'
 print str(count_cabin) + ' cabin'
 print str(count_wheelbase) + ' wheelbase'
 print str(count_forearm) + ' forearm'
