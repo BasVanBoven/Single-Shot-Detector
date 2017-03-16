@@ -63,7 +63,7 @@ os.makedirs(os.path.join('builds', timestamp, 'test', 'label'))
 copytree(os.path.join(rootdir, 'includes'), os.path.join(rootdir, 'builds', timestamp, 'includes'))
 
 
-# copy data to trainval folder
+# copy data to trainval folder, replacing spaces in filenames with underscores
 datacount = 0
 for root, dirs, files in os.walk(sourcedir):
     for name in files:
@@ -72,8 +72,8 @@ for root, dirs, files in os.walk(sourcedir):
             datacount += 1
             assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'image', name + ext)) == False
             assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'label', name + '.xml')) == False
-            copyfile(os.path.join(root, name + ext), os.path.join('builds', timestamp, 'trainval', 'image', name + ext))
-            copyfile(os.path.join(root, name + '.xml'), os.path.join('builds', timestamp, 'trainval', 'label', name + '.xml'))
+            copyfile(os.path.join(root, name + ext), os.path.join('builds', timestamp, 'trainval', 'image', name.replace(" ", "_") + ext))
+            copyfile(os.path.join(root, name + '.xml'), os.path.join('builds', timestamp, 'trainval', 'label', name.replace(" ", "_") + '.xml'))
 print 'moved ' + str(datacount) + ' images (with annotations) to trainval folder'
 
 
@@ -101,6 +101,7 @@ for name in files:
     name, ext = os.path.splitext(name)
     image = Image.open(os.path.join('builds', timestamp, 'trainval', 'image', name + '.jpg'))
     maxsize = (resize, resize)
+    #image.resize((int(oldwidth * crop), int(oldheight * crop)), Image.ANTIALIAS)
     image.thumbnail(maxsize, PIL.Image.ANTIALIAS)
     image.save(os.path.join('builds', timestamp, 'trainval', 'image', name + '.jpg'))
 print 'done resizing all images (and annotations)'
