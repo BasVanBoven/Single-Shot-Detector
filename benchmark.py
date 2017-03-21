@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# train.py - tests a Single Shot Detector
+# benchmark.py - benchmarks a Single Shot Detector
 
 
 # imports
@@ -8,6 +8,7 @@ import sys
 import caffe
 import argparse
 import numpy as np
+import xml.etree.ElementTree as ET
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 from google.protobuf import text_format
@@ -15,8 +16,10 @@ from caffe.proto import caffe_pb2
 
 
 # handle input arguments
-parser = argparse.ArgumentParser(description='Test a Single Shot Detector.')
-parser.add_argument('builddir', help='build (timestamp only) that is to be trained')
+parser = argparse.ArgumentParser(description='Benchmark a Single Shot Detector.')
+parser.add_argument('builddir', help='build (timestamp only) that is to be benchmarked')
+parser.add_argument('-c', '--conf', type=float, default=0.4, help='confidence a detection must have to count')
+parser.add_argument('-o', '--overlap', type=float, default=0.5, help='overlap a detection must have with the ground truth to count')
 args = parser.parse_args()
 
 
@@ -25,6 +28,9 @@ args = parser.parse_args()
 rootdir = os.getcwd()
 # caffe root directory
 rootcaffe = '/caffe'
+# test directory
+testdir = 'testsets_new'
+testpath = os.path.join(rootdir, testdir)
 # determines which build to use
 builddir = args.builddir
 # directory change, meaning all paths after this need to be built from rootdir
@@ -84,10 +90,10 @@ def get_iter_recent():
     return max_iter
 
 
-# processes an image through the SSD network and saves the output to a image file
-def process_image(path_input, path_output):
+# processes an image through the SSD network and compares the output
+def process_image(path_input, total_detections, successful_detections):
     image = caffe.io.load_image(path_input)
-    plt.imshow(image, alpha=1)
+    plt.imshow(image, alpha=0)
     transformed_image = transformer.preprocess('data', image)
     net.blobs['data'].data[...] = transformed_image
     # forward pass
@@ -100,8 +106,8 @@ def process_image(path_input, path_output):
     det_xmax = detections[0,0,:,5]
     det_ymax = detections[0,0,:,6]
     # get detections with confidence higher than a certain threshold
-    top_indices = [i for i, conf in enumerate(det_conf) if conf >= 0.3]
-    # prepare information for output
+    top_indices = [i for i, conf in enumerate(det_conf) if conf >= args.conf]
+    # prepare prediction results
     top_conf = det_conf[top_indices]
     top_label_indices = det_label[top_indices].tolist()
     top_labels = get_labelname(labelmap, top_label_indices)
@@ -109,25 +115,43 @@ def process_image(path_input, path_output):
     top_ymin = det_ymin[top_indices]
     top_xmax = det_xmax[top_indices]
     top_ymax = det_ymax[top_indices]
-    colors = plt.cm.hsv(np.linspace(0, 1, 21)).tolist()
-    # build output
-    currentAxis = plt.gca()
-    for i in xrange(top_conf.shape[0]):
-        xmin = int(round(top_xmin[i] * image.shape[1]))
-        ymin = int(round(top_ymin[i] * image.shape[0]))
-        xmax = int(round(top_xmax[i] * image.shape[1]))
-        ymax = int(round(top_ymax[i] * image.shape[0]))
-        score = top_conf[i]
-        label = int(top_label_indices[i])
-        label_name = top_labels[i]
-        display_txt = '%s: %.2f'%(label_name, score)
-        coords = (xmin, ymin), xmax-xmin+1, ymax-ymin+1
-        color = colors[label]
-        currentAxis.add_patch(plt.Rectangle(*coords, fill=False, edgecolor=color, linewidth=2))
-        currentAxis.text(xmin, ymin, display_txt, bbox={'facecolor':color, 'alpha':0.5})
-    # save output and close all open figures
-    plt.savefig(path_output, bbox_inches='tight')
+    # prepare ground truth tree
+    name, ext = os.path.splitext(path_input)
+    assert os.path.exists(os.path.join(testpath, name + '.xml'))
+    tree = ET.parse(os.path.join(testpath, name + '.xml'))
+    tree_root = tree.getroot()
+    # for each ground truth bounding box
+    for object in tree_root.findall('object'):
+        total_detections = total_detections + 1
+        found = False
+        gt_xmin = int(object.find('bndbox').find('xmin').text)
+        gt_ymin = int(object.find('bndbox').find('ymin').text)
+        gt_xmax = int(object.find('bndbox').find('xmax').text)
+        gt_ymax = int(object.find('bndbox').find('ymax').text)
+        # iterate over all predictions
+        for i in xrange(top_conf.shape[0]):
+            if (object.find('name').text == top_labels[i]):
+                # extract prediction results
+                pred_xmin = int(round(top_xmin[i] * image.shape[1]))
+                pred_ymin = int(round(top_ymin[i] * image.shape[0]))
+                pred_xmax = int(round(top_xmax[i] * image.shape[1]))
+                pred_ymax = int(round(top_ymax[i] * image.shape[0]))
+                # determine edges of overlap
+                left = max(min(gt_xmin,gt_xmax),min(pred_xmin,pred_xmax))
+                right = min(max(gt_xmin,gt_xmax),max(pred_xmin,pred_xmax))
+                top = max(min(gt_ymin,gt_ymax),min(pred_ymin,pred_ymax))
+                bottom = min(max(gt_ymin,gt_ymax),max(pred_ymin,pred_ymax))
+                # calculate overlap percentage
+                surface_overlap = (right-left)*(bottom-top)
+                surface_f2 = abs(gt_xmax-gt_xmin)*abs(gt_ymax-gt_ymin)
+                overlap_percentage = float(surface_overlap) / float(surface_f2)
+                print overlap_percentage
+                if overlap_percentage > args.overlap:
+                    found = True
+        if (found == True):
+            successful_detections = successful_detections + 1
     print ('Processed figure '+path_input)
+    return(total_detections, successful_detections)
     plt.close('all')
 
 
@@ -151,14 +175,17 @@ net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
 
 # perform all tests in testsets
-datacount = 0
-for root, dirs, files in os.walk(os.path.join(rootdir, 'testsets')):
-    for name in files:
-        name, ext = os.path.splitext(name)
-        if (ext.lower() == '.jpg'):
-            datacount += 1
-            output_dirs = root.split("testsets/")[1]
-            target_dir = os.path.join(root, '../..', 'builds', builddir, 'testsets_output', output_dirs)
-            if not os.path.exists(target_dir):
-                os.makedirs(target_dir)
-            process_image(os.path.join(root, name+ext), os.path.join(target_dir, name+'.png'))
+for root, dirs, files in os.walk(testpath):
+    for directory in dirs:
+        total_detections = 0
+        successful_detections = 0
+        print ('Processing testset '+directory+' ...')
+        for subroot, subdirs, subfiles in os.walk(os.path.join(testpath, directory)):
+            for name in subfiles:
+                name, ext = os.path.splitext(name)
+                if (ext.lower() == '.jpg'):
+                    returntuple = process_image(os.path.join(subroot, name+ext), total_detections, successful_detections)
+                    total_detections = returntuple[0]
+                    successful_detections = returntuple[1]
+        accuracy = float(successful_detections) / float(total_detections)
+        print ('Accuracy for '+directory+': '+ str(accuracy * 100))
