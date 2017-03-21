@@ -6,9 +6,10 @@
 
 
 # imports
+import os
+os.environ['GLOG_minloglevel'] = '2'
 import argparse
 import math
-import os
 import shutil
 import stat
 import subprocess

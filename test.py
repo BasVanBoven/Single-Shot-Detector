@@ -4,6 +4,8 @@
 
 # imports
 import os
+import os
+os.environ['GLOG_minloglevel'] = '2'
 import sys
 import caffe
 import argparse

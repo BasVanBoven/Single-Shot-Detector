@@ -4,6 +4,7 @@
 
 # imports
 import os
+os.environ['GLOG_minloglevel'] = '2'
 import sys
 import caffe
 import argparse
@@ -30,7 +31,7 @@ rootdir = os.getcwd()
 # caffe root directory
 rootcaffe = '/caffe'
 # test directory
-testdir = 'testsets_new'
+testdir = 'testsets_benchmark'
 testpath = os.path.join(rootdir, testdir)
 # determines which build to use
 builddir = args.builddir
@@ -179,7 +180,7 @@ for root, dirs, files in os.walk(testpath):
     for directory in dirs:
         total_detections = 0
         successful_detections = 0
-        print ('Processing testset '+directory+' ...')
+        #print ('Processing testset '+directory+' ...')
         for subroot, subdirs, subfiles in os.walk(os.path.join(testpath, directory)):
             for name in subfiles:
                 name, ext = os.path.splitext(name)
