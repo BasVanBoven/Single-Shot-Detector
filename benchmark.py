@@ -94,7 +94,7 @@ def get_iter_recent():
 
 
 # processes an image through the SSD network and compares the output
-def process_image(path_input, total_detections, successful_detections):
+def process_image(path_input, gt_total, gt_ok):
     image = caffe.io.load_image(path_input)
     plt.imshow(image, alpha=0)
     transformed_image = transformer.preprocess('data', image)
@@ -125,7 +125,11 @@ def process_image(path_input, total_detections, successful_detections):
     tree_root = tree.getroot()
     # for each ground truth bounding box
     for object in tree_root.findall('object'):
-        total_detections = total_detections + 1
+        if gt_total.has_key(object.find('name').text) == False:
+            gt_total[object.find('name').text] = 0
+            gt_ok[object.find('name').text] = 0
+        gt_total[object.find('name').text] = gt_total[object.find('name').text] + 1
+        gt_total['total'] = gt_total['total'] + 1
         found = False
         gt_xmin = int(object.find('bndbox').find('xmin').text)
         gt_ymin = int(object.find('bndbox').find('ymin').text)
@@ -151,8 +155,9 @@ def process_image(path_input, total_detections, successful_detections):
                 if overlap_percentage > args.overlap:
                     found = True
         if (found == True):
-            successful_detections = successful_detections + 1
-    return(total_detections, successful_detections)
+            gt_ok[object.find('name').text] = gt_ok[object.find('name').text] + 1
+            gt_ok['total'] = gt_ok['total'] + 1
+    return(gt_total, gt_ok)
     plt.close('all')
 
 
@@ -178,15 +183,16 @@ net.blobs['data'].reshape(1,3,image_resize,image_resize)
 # perform all tests in testsets
 for root, dirs, files in os.walk(testpath):
     for directory in dirs:
-        total_detections = 0
-        successful_detections = 0
+        gt_total = {'total': 0}
+        gt_ok = {'total': 0}
         #print ('Processing testset '+directory+' ...')
         for subroot, subdirs, subfiles in os.walk(os.path.join(testpath, directory)):
             for name in subfiles:
                 name, ext = os.path.splitext(name)
                 if (ext.lower() == '.jpg'):
-                    returntuple = process_image(os.path.join(subroot, name+ext), total_detections, successful_detections)
-                    total_detections = returntuple[0]
-                    successful_detections = returntuple[1]
-        accuracy = float(successful_detections) / float(total_detections)
+                    gt_total, gt_ok = process_image(os.path.join(subroot, name+ext), gt_total, gt_ok)
+        accuracy = float(gt_ok['total']) / float(gt_total['total'])
         print ('Accuracy for '+directory+': '+ str(accuracy * 100))
+        for i in gt_total:
+            if i != 'total':
+                print i, gt_total[i], gt_ok[i], float(gt_ok[i]) / float(gt_total[i])
