@@ -16,7 +16,8 @@ from caffe.proto import caffe_pb2
 
 # handle input arguments
 parser = argparse.ArgumentParser(description='Test a Single Shot Detector.')
-parser.add_argument('builddir', help='build (timestamp only) that is to be trained')
+parser.add_argument('builddir', help='build (timestamp only) that is to be tested')
+parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
 args = parser.parse_args()
 
 
@@ -78,9 +79,10 @@ def get_iter_recent():
         model_name = "ssd"+str(ssd_version)+"x"+str(ssd_version)
         iter = int(basename.split("{}_iter_".format(model_name))[1])
         if iter > max_iter:
-          max_iter = iter
-          # ugly hack: hardcode the model iteration to use
-          #max_iter = 50000
+            max_iter = iter
+        # if an iteration is specified manually, use that
+        if args.iter != 0:
+            max_iter = args.iter
     return max_iter
 
 

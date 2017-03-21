@@ -18,6 +18,7 @@ from caffe.proto import caffe_pb2
 # handle input arguments
 parser = argparse.ArgumentParser(description='Benchmark a Single Shot Detector.')
 parser.add_argument('builddir', help='build (timestamp only) that is to be benchmarked')
+parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
 parser.add_argument('-c', '--conf', type=float, default=0.4, help='confidence a detection must have to count')
 parser.add_argument('-o', '--overlap', type=float, default=0.5, help='overlap a detection must have with the ground truth to count')
 args = parser.parse_args()
@@ -84,9 +85,10 @@ def get_iter_recent():
         model_name = "ssd"+str(ssd_version)+"x"+str(ssd_version)
         iter = int(basename.split("{}_iter_".format(model_name))[1])
         if iter > max_iter:
-          max_iter = iter
-          # ugly hack: hardcode the model iteration to use
-          #max_iter = 50000
+            max_iter = iter
+        # if an iteration is specified manually, use that
+        if args.iter != 0:
+            max_iter = args.iter
     return max_iter
 
 
@@ -145,12 +147,10 @@ def process_image(path_input, total_detections, successful_detections):
                 surface_overlap = (right-left)*(bottom-top)
                 surface_f2 = abs(gt_xmax-gt_xmin)*abs(gt_ymax-gt_ymin)
                 overlap_percentage = float(surface_overlap) / float(surface_f2)
-                print overlap_percentage
                 if overlap_percentage > args.overlap:
                     found = True
         if (found == True):
             successful_detections = successful_detections + 1
-    print ('Processed figure '+path_input)
     return(total_detections, successful_detections)
     plt.close('all')
 
