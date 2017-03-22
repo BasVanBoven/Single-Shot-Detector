@@ -26,7 +26,30 @@ from random import shuffle
 parser = argparse.ArgumentParser(description='Process input data for training a Single Shot Detector.')
 parser.add_argument('sourcedir', help='directory that is to be processed')
 parser.add_argument('-p', '--pretend', default=False, action='store_true', help='disable write mode')
+parser.add_argument('-o', '--overlap', type=float, default=0.99, help='maximum overlap two frames may have')
 args = parser.parse_args()
+
+
+# returns a float denoting the percentage
+def overlap(original, match):
+    # extract coordinates
+    xmin1 = int(original.find('bndbox').find('xmin').text)
+    ymin1 = int(original.find('bndbox').find('ymin').text)
+    xmax1 = int(original.find('bndbox').find('xmax').text)
+    ymax1 = int(original.find('bndbox').find('ymax').text)
+    xmin2 = int(match.find('bndbox').find('xmin').text)
+    ymin2 = int(match.find('bndbox').find('ymin').text)
+    xmax2 = int(match.find('bndbox').find('xmax').text)
+    ymax2 = int(match.find('bndbox').find('ymax').text)
+    # determine edges of overlap
+    left = max(min(xmin1,xmax1),min(xmin2,xmax2))
+    right = min(max(xmin1,xmax1),max(xmin2,xmax2))
+    top = max(min(ymin1,ymax1),min(ymin2,ymax2))
+    bottom = min(max(ymin1,ymax1),max(ymin2,ymax2))
+    # calculate and return overlap percentage
+    surface_overlap = (right-left)*(bottom-top)
+    surface_f2 = abs(xmax1-xmin1)*abs(ymax1-ymin1)
+    return float(surface_overlap) / float(surface_f2)
 
 
 # returns true if all bounding boxes are equal
@@ -36,13 +59,7 @@ def equal_bbox(current_tree, previous_tree):
     for original in current_root.findall('object'):
         found = False
         for match in previous_root.findall('object'):
-            if (
-                original.find('name').text == match.find('name').text and
-                original.find('bndbox').find('xmin').text == match.find('bndbox').find('xmin').text and
-                original.find('bndbox').find('xmax').text == match.find('bndbox').find('xmax').text and
-                original.find('bndbox').find('ymin').text == match.find('bndbox').find('ymin').text and
-                original.find('bndbox').find('ymax').text == match.find('bndbox').find('ymax').text
-            ):
+            if (original.find('name').text == match.find('name').text and overlap(original, match) > args.overlap):
                 found = True
         if found == False:
             # no similar object has been found for the original: frame is not a duplicate
