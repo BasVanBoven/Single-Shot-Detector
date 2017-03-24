@@ -7,7 +7,6 @@
 
 # imports
 import os
-os.environ['GLOG_minloglevel'] = '2'
 import argparse
 import math
 import shutil

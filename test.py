@@ -91,7 +91,7 @@ def get_iter_recent():
 # processes an image through the SSD network and saves the output to a image file
 def process_image(path_input, path_output):
     image = caffe.io.load_image(path_input)
-    plt.imshow(image, alpha=1)
+    plt.imshow(image, alpha=0)
     transformed_image = transformer.preprocess('data', image)
     net.blobs['data'].data[...] = transformed_image
     # forward pass

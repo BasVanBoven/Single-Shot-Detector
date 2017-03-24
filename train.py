@@ -5,7 +5,6 @@
 # imports
 from __future__ import print_function
 import os
-os.environ['GLOG_minloglevel'] = '2'
 import caffe
 import argparse
 import math

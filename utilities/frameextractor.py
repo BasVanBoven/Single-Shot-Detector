@@ -9,7 +9,7 @@ import argparse
 
 
 # handle input arguments
-parser = argparse.ArgumentParser(description='Train a Single Shot Detector.')
+parser = argparse.ArgumentParser(description='Batch extract frames from video\'s.')
 parser.add_argument('target_dir', help='directory which is to be walked recursively')
 parser.add_argument('-l', '--list', default=False, action='store_true', help='list the available video files instead of converting them')
 args = parser.parse_args()
@@ -30,4 +30,4 @@ for root, dirs, files in os.walk(args.target_dir):
                 if not os.path.exists(target_dir):
                     os.makedirs(target_dir)
                 # call ffmpeg
-                os.system('ffmpeg -i "'+root+'/'+name+ext+'" -r 1 "'+'frames'+'/'+name+'"/"'+name+'"_%4d.jpg')
+                os.system('ffmpeg -i "'+root+'/'+name+ext+'" -r 0.5 "'+'frames'+'/'+name+'"/"'+name+'"_%4d.jpg')

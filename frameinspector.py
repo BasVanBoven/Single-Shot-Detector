@@ -26,7 +26,7 @@ from random import shuffle
 parser = argparse.ArgumentParser(description='Process input data for training a Single Shot Detector.')
 parser.add_argument('sourcedir', help='directory that is to be processed')
 parser.add_argument('-p', '--pretend', default=False, action='store_true', help='disable write mode')
-parser.add_argument('-o', '--overlap', type=float, default=0.99, help='maximum overlap two frames may have')
+parser.add_argument('-o', '--overlap', type=float, default=0.8, help='maximum overlap two frames may have')
 args = parser.parse_args()
 
 
@@ -71,6 +71,7 @@ def equal_bbox(current_tree, previous_tree):
 # reset counters
 datacount = 0
 count_missinglabels = 0
+count_unknownlabels = 0
 count_similar = 0
 count_cabin = 0
 count_wheelbase = 0
@@ -122,7 +123,13 @@ for root, dirs, files in sorted(os.walk(args.sourcedir)):
                             count_attachment_bucket += 1
                         elif object.find('name').text == 'attachment-breaker':
                             count_attachment_breaker += 1
-        previous_tree = current_tree
+                        else:
+                            print (os.path.join(root, name + '.xml') + ' has unknown labels')
+                            count_unknownlabels += 1
+                            if (args.pretend == False):
+                                os.remove(os.path.join(root, name + '.jpg'))
+                                os.remove(os.path.join(root, name + '.xml'))
+                    previous_tree = current_tree
 
 
 # print statistics
@@ -130,6 +137,7 @@ print ''
 print ''
 print 'Scanned ' + str(datacount) + ' images:'
 print str(count_missinglabels) + ' missing labels'
+print str(count_unknownlabels) + ' unknown labels'
 print str(count_similar) + ' similar frames'
 if (args.pretend):
     print 'Run without the pretend flag (-p) to remove these images'
