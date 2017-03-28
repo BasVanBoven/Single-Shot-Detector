@@ -32,6 +32,7 @@ rootdir = os.getcwd()
 rootcaffe = '/caffe'
 # test directory
 testdir = 'testsets_benchmark'
+emptydir = 'emptyscenes'
 testpath = os.path.join(rootdir, testdir)
 # determines which build to use
 builddir = args.builddir
@@ -161,6 +162,23 @@ def process_image(path_input, gt_total, gt_ok):
     plt.close('all')
 
 
+# processes an image through the SSD network and counts the false positives
+def count_false_positives(path_input):
+    image = caffe.io.load_image(path_input)
+    plt.imshow(image, alpha=0)
+    transformed_image = transformer.preprocess('data', image)
+    net.blobs['data'].data[...] = transformed_image
+    # forward pass
+    detections = net.forward()['detection_out']
+    # parse the outputs
+    det_conf = detections[0,0,:,2]
+    # get detections with confidence higher than a certain threshold
+    top_indices = [i for i, conf in enumerate(det_conf) if conf >= args.conf]
+    # prepare prediction results
+    top_conf = det_conf[top_indices]
+    return top_conf.shape[0]
+
+
 # paths to model files
 iter_recent = get_iter_recent()
 model_weights = os.path.join(rootdir, 'builds', builddir, 'snapshots', 'ssd'+str(ssd_version)+'x'+str(ssd_version)+'_iter_'+str(iter_recent)+'.caffemodel')
@@ -181,18 +199,31 @@ net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
 
 # perform all tests in testsets
+print ('Testing model '+ args.builddir + ':\n')
+
+
+# detection test
 for root, dirs, files in os.walk(testpath):
     for directory in dirs:
-        gt_total = {'total': 0}
-        gt_ok = {'total': 0}
-        #print ('Processing testset '+directory+' ...')
-        for subroot, subdirs, subfiles in os.walk(os.path.join(testpath, directory)):
-            for name in subfiles:
-                name, ext = os.path.splitext(name)
-                if (ext.lower() == '.jpg'):
-                    gt_total, gt_ok = process_image(os.path.join(subroot, name+ext), gt_total, gt_ok)
-        accuracy = float(gt_ok['total']) / float(gt_total['total'])
-        print ('Accuracy for '+directory+': '+ str(accuracy * 100))
-        for i in gt_total:
-            if i != 'total':
-                print i, gt_total[i], gt_ok[i], float(gt_ok[i]) / float(gt_total[i])
+        if directory != emptydir:
+            gt_total = {'total': 0}
+            gt_ok = {'total': 0}
+            for subroot, subdirs, subfiles in os.walk(os.path.join(testpath, directory)):
+                for name in subfiles:
+                    name, ext = os.path.splitext(name)
+                    if (ext.lower() == '.jpg'):
+                        gt_total, gt_ok = process_image(os.path.join(subroot, name+ext), gt_total, gt_ok)
+            accuracy = float(gt_ok['total']) / float(gt_total['total'])
+            print ('Accuracy for '+directory+': '+ str("{0:.2f}".format(accuracy * 100)))
+            for i in gt_total:
+                if i != 'total':
+                    print '  ', i, gt_total[i], gt_ok[i], "{0:.2f}".format(float(gt_ok[i]) / float(gt_total[i]))
+            print (' ')
+
+
+# false positive test
+falsepositives = 0
+for root, dirs, files in os.walk(os.path.join(testpath, emptydir)):
+    for name in files:
+        falsepositives += count_false_positives(os.path.join(root, name))
+print ('False positives: '+ str(falsepositives))

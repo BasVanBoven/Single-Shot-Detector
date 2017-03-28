@@ -91,7 +91,7 @@ def get_iter_recent():
 # processes an image through the SSD network and saves the output to a image file
 def process_image(path_input, path_output):
     image = caffe.io.load_image(path_input)
-    plt.imshow(image, alpha=0)
+    plt.imshow(image, alpha=1)
     transformed_image = transformer.preprocess('data', image)
     net.blobs['data'].data[...] = transformed_image
     # forward pass
@@ -104,7 +104,7 @@ def process_image(path_input, path_output):
     det_xmax = detections[0,0,:,5]
     det_ymax = detections[0,0,:,6]
     # get detections with confidence higher than a certain threshold
-    top_indices = [i for i, conf in enumerate(det_conf) if conf >= 0.3]
+    top_indices = [i for i, conf in enumerate(det_conf) if conf >= 0.4]
     # prepare information for output
     top_conf = det_conf[top_indices]
     top_label_indices = det_label[top_indices].tolist()
@@ -161,7 +161,7 @@ for root, dirs, files in os.walk(os.path.join(rootdir, 'testsets')):
         name, ext = os.path.splitext(name)
         if (ext.lower() == '.jpg'):
             datacount += 1
-            output_dirs = root.split("testsets/")[1]
+            output_dirs = root.split("testsets")[1]
             target_dir = os.path.join(root, '../..', 'builds', builddir, 'testsets_output', output_dirs)
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)
