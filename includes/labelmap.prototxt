@@ -33,3 +33,13 @@ item {
   label: 6
   display_name: "attachment-breaker"
 }
+item {
+  name: "manual-crouching"
+  label: 7
+  display_name: "manual-crouching"
+}
+item {
+  name: "manual-earthrod"
+  label: 8
+  display_name: "manual-earthrod"
+}

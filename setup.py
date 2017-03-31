@@ -68,17 +68,18 @@ copytree(os.path.join(rootdir, 'includes'), os.path.join(rootdir, 'builds', time
 datacount = 0
 for root, dirs, files in os.walk(sourcedir):
     for directory in dirs:
-        for subroot, subdirs, subfiles in os.walk(directory):
+        for subroot, subdirs, subfiles in os.walk(os.path.join(sourcedir,directory)):
             infoldercount = 0
+            random.shuffle(subfiles)
             for name in subfiles:
                 name, ext = os.path.splitext(name)
-                if (ext.lower() == '.jpg' and os.path.exists(os.path.join(root, name + '.xml')) and infoldercount < args.maxframes):
+                if (ext.lower() == '.jpg' and os.path.exists(os.path.join(subroot, name + '.xml')) and infoldercount < args.maxframes):
                     datacount += 1
                     infoldercount += 1
                     assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'image', name + ext)) == False
                     assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'label', name + '.xml')) == False
-                    copyfile(os.path.join(root, name + ext), os.path.join('builds', timestamp, 'trainval', 'image', name.replace(" ", "_") + ext))
-                    copyfile(os.path.join(root, name + '.xml'), os.path.join('builds', timestamp, 'trainval', 'label', name.replace(" ", "_") + '.xml'))
+                    copyfile(os.path.join(subroot, name + ext), os.path.join('builds', timestamp, 'trainval', 'image', name.replace(" ", "_") + ext))
+                    copyfile(os.path.join(subroot, name + '.xml'), os.path.join('builds', timestamp, 'trainval', 'label', name.replace(" ", "_") + '.xml'))
 print 'moved ' + str(datacount) + ' images (with annotations) to trainval folder'
 
 
