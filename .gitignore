@@ -1,6 +1,6 @@
 builds/*
 frames/*
-frames2/*
+frames_old/*
 testsets/*
 testsets_benchmark/*
 temp/*
