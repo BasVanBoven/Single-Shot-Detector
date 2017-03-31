@@ -197,10 +197,8 @@ transformer.set_channel_swap('data', (2,1,0))
 image_resize = int(ssd_version)
 net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
-
 # perform all tests in testsets
 print ('Testing model '+ args.builddir + ':\n')
-
 
 # detection test
 for root, dirs, files in os.walk(testpath):
@@ -219,7 +217,6 @@ for root, dirs, files in os.walk(testpath):
                 if i != 'total':
                     print '  ', i, gt_total[i], gt_ok[i], "{0:.2f}".format(float(gt_ok[i]) / float(gt_total[i]))
             print (' ')
-
 
 # false positive test
 falsepositives = 0

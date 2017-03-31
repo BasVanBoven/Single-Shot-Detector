@@ -26,40 +26,27 @@ from random import shuffle
 parser = argparse.ArgumentParser(description='Process input data for training a Single Shot Detector.')
 parser.add_argument('sourcedir', help='directory that is to be processed')
 parser.add_argument('-p', '--pretend', default=False, action='store_true', help='disable write mode')
-parser.add_argument('-o', '--overlap', type=float, default=0.8, help='maximum overlap two frames may have')
 args = parser.parse_args()
 
 
-# returns a float denoting the percentage
-def overlap(original, match):
-    # extract coordinates
-    xmin1 = int(original.find('bndbox').find('xmin').text)
-    ymin1 = int(original.find('bndbox').find('ymin').text)
-    xmax1 = int(original.find('bndbox').find('xmax').text)
-    ymax1 = int(original.find('bndbox').find('ymax').text)
-    xmin2 = int(match.find('bndbox').find('xmin').text)
-    ymin2 = int(match.find('bndbox').find('ymin').text)
-    xmax2 = int(match.find('bndbox').find('xmax').text)
-    ymax2 = int(match.find('bndbox').find('ymax').text)
-    # determine edges of overlap
-    left = max(min(xmin1,xmax1),min(xmin2,xmax2))
-    right = min(max(xmin1,xmax1),max(xmin2,xmax2))
-    top = max(min(ymin1,ymax1),min(ymin2,ymax2))
-    bottom = min(max(ymin1,ymax1),max(ymin2,ymax2))
-    # calculate and return overlap percentage
-    surface_overlap = (right-left)*(bottom-top)
-    surface_f2 = abs(xmax1-xmin1)*abs(ymax1-ymin1)
-    return float(surface_overlap) / float(surface_f2)
-
-
-# returns true if all bounding boxes are equal
+# returns true if all bounding boxes are equal, however, earth rod images are never equal
 def equal_bbox(current_tree, previous_tree):
     previous_root = previous_tree.getroot()
     current_root = current_tree.getroot()
     for original in current_root.findall('object'):
+        # frame is not a duplicate if it has an earth rod in it
+        if (original.find('name').text == 'manual-earthrod'):
+            return False
+        # do duplicate check
         found = False
         for match in previous_root.findall('object'):
-            if (original.find('name').text == match.find('name').text and overlap(original, match) > args.overlap):
+            if (
+                original.find('name').text == match.find('name').text and
+                original.find('bndbox').find('xmin').text == match.find('bndbox').find('xmin').text and
+                original.find('bndbox').find('xmax').text == match.find('bndbox').find('xmax').text and
+                original.find('bndbox').find('ymin').text == match.find('bndbox').find('ymin').text and
+                original.find('bndbox').find('ymax').text == match.find('bndbox').find('ymax').text
+            ):
                 found = True
         if found == False:
             # no similar object has been found for the original: frame is not a duplicate
@@ -71,7 +58,6 @@ def equal_bbox(current_tree, previous_tree):
 # reset counters
 datacount = 0
 count_missinglabels = 0
-count_unknownlabels = 0
 count_similar = 0
 count_cabin = 0
 count_wheelbase = 0
@@ -79,6 +65,8 @@ count_forearm = 0
 count_upperarm = 0
 count_attachment_bucket = 0
 count_attachment_breaker = 0
+count_manual_crouching = 0
+count_manual_earthrod = 0
 
 
 # warn if running without pretend flag
@@ -123,13 +111,11 @@ for root, dirs, files in sorted(os.walk(args.sourcedir)):
                             count_attachment_bucket += 1
                         elif object.find('name').text == 'attachment-breaker':
                             count_attachment_breaker += 1
-                        else:
-                            print (os.path.join(root, name + '.xml') + ' has unknown labels')
-                            count_unknownlabels += 1
-                            if (args.pretend == False):
-                                os.remove(os.path.join(root, name + '.jpg'))
-                                os.remove(os.path.join(root, name + '.xml'))
-                    previous_tree = current_tree
+                        elif object.find('name').text == 'manual-crouching':
+                            count_manual_crouching += 1
+                        elif object.find('name').text == 'manual-earthrod':
+                            count_manual_earthrod += 1
+        previous_tree = current_tree
 
 
 # print statistics
@@ -137,7 +123,6 @@ print ''
 print ''
 print 'Scanned ' + str(datacount) + ' images:'
 print str(count_missinglabels) + ' missing labels'
-print str(count_unknownlabels) + ' unknown labels'
 print str(count_similar) + ' similar frames'
 if (args.pretend):
     print 'Run without the pretend flag (-p) to remove these images'
@@ -151,3 +136,5 @@ print str(count_forearm) + ' forearm'
 print str(count_upperarm) + ' upperarm'
 print str(count_attachment_bucket) + ' attachment-bucket'
 print str(count_attachment_breaker) + ' attachment-breaker'
+print str(count_manual_crouching) + ' manual-crouching'
+print str(count_manual_earthrod) + ' manual-earthrod'

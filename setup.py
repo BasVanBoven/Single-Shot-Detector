@@ -6,9 +6,9 @@
 
 
 # imports
-import os
 import argparse
 import math
+import os
 import shutil
 import stat
 import subprocess
@@ -32,6 +32,7 @@ from PIL import Image
 # handle input arguments
 parser = argparse.ArgumentParser(description='Process input data for training a Single Shot Detector.')
 parser.add_argument('-l', '--large', default=False, action='store_true', help='use the SSD512 architecture')
+parser.add_argument('-m', '--maxframes', type=int, default=50, help='maximum number of frames per video to process')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
 parser.add_argument('-t', '--test', type=float, default=0.2, help='percentage of images in test set')
 args = parser.parse_args()
@@ -63,17 +64,21 @@ os.makedirs(os.path.join('builds', timestamp, 'test', 'label'))
 copytree(os.path.join(rootdir, 'includes'), os.path.join(rootdir, 'builds', timestamp, 'includes'))
 
 
-# copy data to trainval folder, replacing spaces in filenames with underscores
+# copy data to trainval folder, replacing spaces in filenames with underscores, taking only a maximum of images per folder
 datacount = 0
 for root, dirs, files in os.walk(sourcedir):
-    for name in files:
-        name, ext = os.path.splitext(name)
-        if (ext.lower() == '.jpg' and os.path.exists(os.path.join(root, name + '.xml'))):
-            datacount += 1
-            assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'image', name + ext)) == False
-            assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'label', name + '.xml')) == False
-            copyfile(os.path.join(root, name + ext), os.path.join('builds', timestamp, 'trainval', 'image', name.replace(" ", "_") + ext))
-            copyfile(os.path.join(root, name + '.xml'), os.path.join('builds', timestamp, 'trainval', 'label', name.replace(" ", "_") + '.xml'))
+    for directory in dirs:
+        for subroot, subdirs, subfiles in os.walk(directory):
+            infoldercount = 0
+            for name in subfiles:
+                name, ext = os.path.splitext(name)
+                if (ext.lower() == '.jpg' and os.path.exists(os.path.join(root, name + '.xml')) and infoldercount < args.maxframes):
+                    datacount += 1
+                    infoldercount += 1
+                    assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'image', name + ext)) == False
+                    assert os.path.exists(os.path.join('builds', timestamp, 'trainval', 'label', name + '.xml')) == False
+                    copyfile(os.path.join(root, name + ext), os.path.join('builds', timestamp, 'trainval', 'image', name.replace(" ", "_") + ext))
+                    copyfile(os.path.join(root, name + '.xml'), os.path.join('builds', timestamp, 'trainval', 'label', name.replace(" ", "_") + '.xml'))
 print 'moved ' + str(datacount) + ' images (with annotations) to trainval folder'
 
 
