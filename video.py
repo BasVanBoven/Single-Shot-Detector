@@ -137,12 +137,12 @@ for root, dirs, files in os.walk(folder_input):
             print ('  Converting video into unannotated frames...')
             cmd = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "'+root+'/'+name+ext+'"'
             duration = os.popen(cmd).read()
-            print duration
             i = 0
-            while (i < float(duration)-1):
+            while (i < float(duration)-1 and i < 50):
                 cmd = 'ffmpeg -y -nostats -loglevel 0 -i "'+root+'/'+name+ext+'" -ss '+str(i/3600).zfill(2)+':'+str(i/60).zfill(2)+':'+str(i%60).zfill(2)+'.5 -t 00:00:01 -r 1 -f singlejpeg "'+output_jpg_unannotated+'/'+name+'_'+str(i+1).zfill(4)+'.jpg"'
-                #os.system(cmd)
+                os.system(cmd)
                 i = i + 1
+                print i
 
 
             # jpg_unannotated -> res.csv
