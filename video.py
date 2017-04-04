@@ -15,7 +15,11 @@
 # sudo add-apt-repository ppa:mc3man/trusty-media
 # sudo apt-get update
 # sudo apt-get install ffmpeg
-# sudo pip install ffmpy
+# sudo apt-get install python-opencv
+# sudo apt-get install python-imaging
+
+# assumes DeepDetect Docker container is running, run following command on host OS:
+# sudo nvidia-docker run -i -t -p 8080:8080 -v /home/ubuntu/dockershare:/dockershare:rshared beniz/deepdetect_gpu
 
 
 # imports
@@ -27,17 +31,14 @@ import stat
 import subprocess
 import sys
 import random
-import PIL
 import time
 import datetime
 import random
-import caffe
 import cv2
-import ffmpy
 import re
-from google.protobuf import text_format
-from PIL import Image
+import json
 from dd_client import DD
+from PIL import Image
 
 
 # handle input arguments
@@ -45,7 +46,7 @@ parser = argparse.ArgumentParser(description='Process input data for training a 
 parser.add_argument('builddir', help='build (timestamp only) that is to be tested')
 parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
 parser.add_argument('-f', '--framerate', type=float, default=1.0, help='how many frames to store and process per second')
-parser.add_argument('-c', '--confidence-threshold', type=float, default=0.1, help='keep detections with confidence above threshold')
+parser.add_argument('-c', '--confidence-threshold', type=float, default=0.35, help='keep detections with confidence above threshold')
 args = parser.parse_args()
 
 
@@ -96,6 +97,17 @@ print ('Using model ' + recentmodel)
 shutil.copy2(os.path.join('builds', args.builddir, 'snapshots', recentmodel), 'dedemodel/model.caffemodel')
 
 
+# setup DeepDetect service if necessary
+dd = DD('localhost')
+dd.set_return_format(dd.RETURN_PYTHON)
+model = {'repository':'/dockershare/ssd/dedemodel'}
+parameters_input = {'connector':'image', 'width':512, 'height':512}
+parameters_mllib = {'nclasses':7}
+parameters_output = {}
+detect = dd.delete_service('ssd')
+detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameters_input, parameters_mllib, parameters_output, 'supervised')
+
+
 # recursively process directory
 for root, dirs, files in os.walk(folder_input):
     for name in files:
@@ -116,13 +128,24 @@ for root, dirs, files in os.walk(folder_input):
             output_jpg_annotated = os.path.join(folder_video_output,'jpg_annotated')
             if not os.path.exists(output_jpg_annotated):
                 os.makedirs(output_jpg_annotated)
-            output_ssd = os.path.join(folder_video_output,'ssd')
-            if not os.path.exists(output_ssd):
-                os.makedirs(output_ssd)
+            output_json = os.path.join(folder_video_output,'json')
+            if not os.path.exists(output_json):
+                os.makedirs(output_json)
             output_csv = os.path.join(folder_video_output,name+'.csv')
+            output_res = os.path.join(folder_video_output,'res.csv')
             # call ffmpeg
             cmd = 'ffmpeg -nostats -loglevel 0 -i "'+root+'/'+name+ext+'" -r '+str(args.framerate)+' "'+output_jpg_unannotated+'/'+name+'"_%4d.jpg'
-            #os.system(cmd)
+            os.system(cmd)
+
+
+            # jpg_unannotated -> res.csv
+            image = Image.open(os.path.join(output_jpg_unannotated,name+'_0001.jpg'))
+            print (image.size) # (width,height) tuple
+            with open(output_res, 'w+') as res:
+                res.write(str(image.size[0]))
+                res.write(',')
+                res.write(str(image.size[1]))
+                res.write('\n')
 
 
             # txt -> csv
@@ -162,5 +185,29 @@ for root, dirs, files in os.walk(folder_input):
 
             # jpg_unannotated -> json, jpg_annotated
             print ('  Processing unannotated frames through DeepDetect...')
-            #for subroot, subdirs, subfiles in os.walk(output_jpg_unannotated):
-            #    for subname in subfiles:
+            for subroot, subdirs, subfiles in os.walk(output_jpg_unannotated):
+                for frame in sorted(subfiles):
+                    parameters_input = {}
+                    parameters_mllib = {'gpu':True}
+                    parameters_output = {'bbox':True, 'confidence_threshold': args.confidence_threshold}
+                    data = [os.path.join(output_jpg_unannotated,frame)]
+                    detect = dd.post_predict('ssd',data,parameters_input,parameters_mllib,parameters_output)
+                    #print detect
+                    if detect['status']['code'] != 200:
+                        print 'error',detect['status']['code']
+                        sys.exit()
+                    predictions = detect['body']['predictions']
+                    with open(os.path.join(output_json,frame[:-4]+'.json'), 'w') as f:
+                        json.dump(detect, f)
+                        f.close()
+                    for p in predictions:
+                        img = cv2.imread(p['uri'])
+                        # white image background, comment line below to see image behind boxes
+                        cv2.rectangle(img,(0,9999),(9999,0),(255,255,255),-1)
+                        for c in p['classes']:
+                            cat = c['cat']
+                            bbox = c['bbox']
+                            if c['prob'] > args.confidence_threshold:
+                                cv2.rectangle(img,(int(bbox['xmin']),int(bbox['ymax'])),(int(bbox['xmax']),int(bbox['ymin'])),(0,0,0),2)
+                                cv2.putText(img,cat+' '+str("{0:.2f}".format(c['prob'])),(int(bbox['xmin']),int(bbox['ymax'])),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,0))
+                        cv2.imwrite(os.path.join(output_jpg_annotated,frame[:-4]+'.jpg'),img)

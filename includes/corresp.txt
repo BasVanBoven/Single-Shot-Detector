@@ -5,3 +5,5 @@
 4 wheelbase
 5 attachment-bucket
 6 attachment-breaker
+7 manual-crouching
+8 manual-earthrod

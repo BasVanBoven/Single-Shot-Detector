@@ -890,7 +890,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 28
+    num_output: 36
     pad: 1
     kernel_size: 3
     stride: 1
@@ -1004,7 +1004,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 42
+    num_output: 54
     pad: 1
     kernel_size: 3
     stride: 1
@@ -1119,7 +1119,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 42
+    num_output: 54
     pad: 1
     kernel_size: 3
     stride: 1
@@ -1234,7 +1234,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 42
+    num_output: 54
     pad: 1
     kernel_size: 3
     stride: 1
@@ -1349,7 +1349,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 28
+    num_output: 36
     pad: 1
     kernel_size: 3
     stride: 1
@@ -1463,7 +1463,7 @@ layer {
     decay_mult: 0
   }
   convolution_param {
-    num_output: 28
+    num_output: 36
     pad: 1
     kernel_size: 3
     stride: 1
@@ -1566,7 +1566,7 @@ layer {
     shape {
       dim: 0
       dim: -1
-      dim: 7
+      dim: 9
     }
   }
 }
@@ -1599,7 +1599,7 @@ layer {
     phase: TEST
   }
   detection_output_param {
-    num_classes: 7
+    num_classes: 9
     share_location: true
     background_label_id: 0
     nms_param {
