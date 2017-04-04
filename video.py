@@ -115,9 +115,6 @@ for root, dirs, files in os.walk(folder_input):
         if (ext.lower().endswith(('.mp4', '.avi', '.mov')) and os.path.exists(os.path.join(root,name+'.txt'))):
 
 
-            # video -> jpg_unannotated
-            print ('Processing video '+name+'...')
-            print ('  Converting video into unannotated frames...')
             # create directories if they do not exist
             folder_video_output = os.path.join(folder_output,name)
             if not os.path.exists(folder_video_output):
@@ -133,19 +130,25 @@ for root, dirs, files in os.walk(folder_input):
                 os.makedirs(output_json)
             output_csv = os.path.join(folder_video_output,name+'.csv')
             output_res = os.path.join(folder_video_output,'res.csv')
-            # call ffmpeg
-            cmd = 'ffmpeg -nostats -loglevel 0 -i "'+root+'/'+name+ext+'" -r '+str(args.framerate)+' "'+output_jpg_unannotated+'/'+name+'"_%4d.jpg'
-            os.system(cmd)
+
+
+            # video -> jpg_unannotated
+            print ('Processing video '+name+'...')
+            print ('  Converting video into unannotated frames...')
+            cmd = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "'+root+'/'+name+ext+'"'
+            duration = os.popen(cmd).read()
+            print duration
+            i = 0
+            while (i < float(duration)-1):
+                cmd = 'ffmpeg -y -nostats -loglevel 0 -i "'+root+'/'+name+ext+'" -ss '+str(i/3600).zfill(2)+':'+str(i/60).zfill(2)+':'+str(i%60).zfill(2)+'.5 -t 00:00:01 -r 1 -f singlejpeg "'+output_jpg_unannotated+'/'+name+'_'+str(i+1).zfill(4)+'.jpg"'
+                #os.system(cmd)
+                i = i + 1
 
 
             # jpg_unannotated -> res.csv
             image = Image.open(os.path.join(output_jpg_unannotated,name+'_0001.jpg'))
-            print (image.size) # (width,height) tuple
             with open(output_res, 'w+') as res:
-                res.write(str(image.size[0]))
-                res.write(',')
-                res.write(str(image.size[1]))
-                res.write('\n')
+                res.write(str(image.size[0])+','+str(image.size[1])+'\n')
 
 
             # txt -> csv
