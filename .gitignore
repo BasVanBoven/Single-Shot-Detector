@@ -4,4 +4,6 @@ frames_old/*
 testsets/*
 testsets_benchmark/*
 temp/*
+video/*
+dedemodel/*
 frames.zip

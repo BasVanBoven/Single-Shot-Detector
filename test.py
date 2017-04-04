@@ -156,12 +156,12 @@ net.blobs['data'].reshape(1,3,image_resize,image_resize)
 
 # perform all tests in testsets
 datacount = 0
-for root, dirs, files in os.walk(os.path.join(rootdir, 'testsets')):
+for root, dirs, files in os.walk(os.path.join(rootdir, 'testsets_benchmark')):
     for name in files:
         name, ext = os.path.splitext(name)
         if (ext.lower() == '.jpg'):
             datacount += 1
-            output_dirs = root.split('testsets/')[1]
+            output_dirs = root.split('testsets_benchmark/')[1]
             target_dir = os.path.join(root, '../..', 'builds', builddir, 'testsets_output', output_dirs)
             if not os.path.exists(target_dir):
                 os.makedirs(target_dir)

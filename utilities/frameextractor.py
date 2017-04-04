@@ -15,7 +15,7 @@ parser.add_argument('-l', '--list', default=False, action='store_true', help='li
 args = parser.parse_args()
 
 
-# perform all tests in testsets
+# process all videos
 for root, dirs, files in os.walk(args.target_dir):
     for name in files:
         name, ext = os.path.splitext(name)

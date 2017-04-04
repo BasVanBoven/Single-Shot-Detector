@@ -1,0 +1,7 @@
+0 background
+1 cabin
+2 forearm
+3 upperarm
+4 wheelbase
+5 attachment-bucket
+6 attachment-breaker

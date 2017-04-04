@@ -44,7 +44,7 @@ rootdir = os.getcwd()
 # caffe root directory
 rootcaffe = '/caffe'
 # folder which contains images and labels
-sourcedir = 'frames'
+sourcedir = 'frames_old'
 # percentage of images in test set
 testratio = args.test
 # longest edge of image, usually 300 or 512 pixels
