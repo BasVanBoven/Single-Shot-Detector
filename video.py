@@ -1,14 +1,8 @@
 #!/usr/bin/python
 # video.py - prepares video's for training the Sequence Processor
 
-# input: a (set of) folders containing videoname.ext and videoname.txt in the same directory
+# input: a set of folders containing videoname.ext and videoname.txt in the same directory
 # output: one folder per video, containing jpg-frames (both unannotated and annotated), json-ssd (from DeepDetect) and csv
-
-# output folder structure:
-# video_output/VIDEONAME/jpg_unannotated/VIDEONAME_FRAMENUMBER.jpg
-# video_output/VIDEONAME/jpg_annotated/VIDEONAME_FRAMENUMBER.jpg
-# video_output/VIDEONAME/json_ssd/VIDEONAME_FRAMENUMBER.json
-# video_output/VIDEONAME/VIDEONAME.csv
 
 # prerequisites:
 # sudo apt-get install software-properties-common
@@ -44,16 +38,19 @@ from PIL import Image
 # handle input arguments
 parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
 parser.add_argument('builddir', help='build (timestamp only) that is to be tested')
+parser.add_argument('-v', '--video', default='v', help='video that is to be processed')
+parser.add_argument('-s', '--skipvids', default=False, action='store_true', help='do not extract the frames from the video again')
 parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
 parser.add_argument('-f', '--framerate', type=float, default=1.0, help='how many frames to store and process per second')
-parser.add_argument('-c', '--confidence-threshold', type=float, default=0.35, help='keep detections with confidence above threshold')
+parser.add_argument('-c', '--confidence-threshold', type=float, default=0.25, help='keep detections with confidence above threshold')
 args = parser.parse_args()
 
 
-# global variables
+# global pathing
 folder_input = os.path.join(os.getcwd(), 'video', 'input')
-folder_temp = os.path.join(os.getcwd(), 'video', 'temp')
 folder_output = os.path.join(os.getcwd(), 'video', 'output')
+if not os.path.exists(folder_output):
+    os.makedirs(folder_output)
 
 
 # gets the most recent iteration for a certain model build
@@ -69,13 +66,6 @@ def most_recent_iteration(build):
                 mostrecentmodel = name
                 mostrecentiteration = int(iteration)
     return mostrecentmodel
-
-
-# make temp and output folder if it does not exist
-if not os.path.exists(folder_temp):
-    os.makedirs(folder_temp)
-if not os.path.exists(folder_output):
-    os.makedirs(folder_output)
 
 
 # build DeepDetect model repo
@@ -112,49 +102,59 @@ detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameter
 for root, dirs, files in os.walk(folder_input):
     for name in files:
         name, ext = os.path.splitext(name)
-        if (ext.lower().endswith(('.mp4', '.avi', '.mov')) and os.path.exists(os.path.join(root,name+'.txt'))):
+        if (
+            ext.lower().endswith(('.mp4', '.avi', '.mov')) and
+            os.path.exists(os.path.join(root,name+'.txt')) and
+            (args.video == 'v' or args.video == name)
+        ):
 
 
-            # create directories if they do not exist
-            folder_video_output = os.path.join(folder_output,name)
-            if not os.path.exists(folder_video_output):
-                os.makedirs(folder_video_output)
-            output_jpg_unannotated = os.path.join(folder_temp,'jpg_unannotated')
+            # start processing the video
+            print ('Processing video '+name+'...')
+
+
+            # video specific pathing
+            output_jpg_unannotated = os.path.join(folder_output,'jpg_unannotated',name)
             if not os.path.exists(output_jpg_unannotated):
                 os.makedirs(output_jpg_unannotated)
-            output_jpg_annotated = os.path.join(folder_video_output,'jpg_annotated')
+            output_jpg_annotated = os.path.join(folder_output,'jpg_annotated',name)
             if not os.path.exists(output_jpg_annotated):
                 os.makedirs(output_jpg_annotated)
-            output_json = os.path.join(folder_video_output,'json')
+            output_json = os.path.join(folder_output,'json',name)
             if not os.path.exists(output_json):
                 os.makedirs(output_json)
-            output_csv = os.path.join(folder_video_output,name+'.csv')
-            output_res = os.path.join(folder_video_output,'res.csv')
+            folder_tags = os.path.join(folder_output,'tags')
+            if not os.path.exists(folder_tags):
+                os.makedirs(folder_tags)
+            folder_resolution = os.path.join(folder_output,'resolution')
+            if not os.path.exists(folder_resolution):
+                os.makedirs(folder_resolution)
+            output_tags = os.path.join(folder_tags,name+'.csv')
+            output_resolution = os.path.join(folder_resolution,name+'.csv')
 
 
             # video -> jpg_unannotated
-            print ('Processing video '+name+'...')
-            print ('  Converting video into unannotated frames...')
-            cmd = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "'+root+'/'+name+ext+'"'
-            duration = os.popen(cmd).read()
-            i = 0
-            while (i < float(duration)-1 and i < 50):
-                cmd = 'ffmpeg -y -nostats -loglevel 0 -i "'+root+'/'+name+ext+'" -ss '+str(i/3600).zfill(2)+':'+str(i/60).zfill(2)+':'+str(i%60).zfill(2)+'.5 -t 00:00:01 -r 1 -f singlejpeg "'+output_jpg_unannotated+'/'+name+'_'+str(i+1).zfill(4)+'.jpg"'
-                os.system(cmd)
-                i = i + 1
-                print i
+            if (args.skipvids == False):
+                print ('  Converting video into unannotated frames...')
+                cmd = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "'+root+'/'+name+ext+'"'
+                duration = os.popen(cmd).read()
+                i = 0.5
+                while (i < float(duration)):
+                    cmd = 'ffmpeg -y -nostats -loglevel 0 -accurate_seek -ss '+str(int(i)/3600).zfill(2)+':'+str(int(i)/60).zfill(2)+':'+str(int(i)%60).zfill(2)+'.5 -t 00:00:01 -i "'+root+'/'+name+ext+'" -r 1 -f singlejpeg "'+output_jpg_unannotated+'/'+name+'_'+str(int(i)+1).zfill(4)+'.jpg"'
+                    os.system(cmd)
+                    i = i + 1
 
 
             # jpg_unannotated -> res.csv
             image = Image.open(os.path.join(output_jpg_unannotated,name+'_0001.jpg'))
-            with open(output_res, 'w+') as res:
+            with open(output_resolution, 'w+') as res:
                 res.write(str(image.size[0])+','+str(image.size[1])+'\n')
 
 
             # txt -> csv
             print ('  Converting tagging txt into csv...')
             with open(os.path.join(root,name+'.txt')) as txt:
-                with open(output_csv, 'w+') as csv:
+                with open(output_tags, 'w+') as csv:
                     # empty csv file
                     csv.truncate()
                     # original situation
