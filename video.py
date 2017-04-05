@@ -145,47 +145,6 @@ for root, dirs, files in os.walk(folder_input):
                     i = i + 1
 
 
-            # jpg_unannotated -> res.csv
-            image = Image.open(os.path.join(output_jpg_unannotated,name+'_0001.jpg'))
-            with open(output_resolution, 'w+') as res:
-                res.write(str(image.size[0])+','+str(image.size[1])+'\n')
-
-
-            # txt -> csv
-            print ('  Converting tagging txt into csv...')
-            with open(os.path.join(root,name+'.txt')) as txt:
-                with open(output_tags, 'w+') as csv:
-                    # empty csv file
-                    csv.truncate()
-                    # original situation
-                    minutes = 0
-                    seconds = 0
-                    status = 2
-                    # process per line
-                    for line in txt:
-                        line = line.replace(' ', '')
-                        if (len(line.strip()) != 0):
-                            # translate human format to machine format
-                            line = line.replace('nodig', '0')
-                            line = line.replace('dig', '1')
-                            line = line.replace(':', '')
-                            # if the assertion fails, the tag file contains an error
-                            assert len(line.strip()) == 5
-                            # grab from line
-                            prevminutes = minutes
-                            prevseconds = seconds
-                            prevstatus = status
-                            minutes = line[0:2]
-                            seconds = line[2:4]
-                            status = line[4:5]
-                            # calculate and push a new csv line, if not the first grab
-                            if (prevstatus != 2):
-                                pushstatus = prevstatus
-                                pushlength = (int(seconds) + int(minutes) * 60) - (int(prevseconds) + int(prevminutes) * 60)
-                                csv.write(str(pushlength)+','+str(pushstatus))
-                                csv.write('\n')
-
-
             # jpg_unannotated -> json, jpg_annotated
             print ('  Processing unannotated frames through DeepDetect...')
             for subroot, subdirs, subfiles in os.walk(output_jpg_unannotated):
@@ -197,8 +156,8 @@ for root, dirs, files in os.walk(folder_input):
                     detect = dd.post_predict('ssd',data,parameters_input,parameters_mllib,parameters_output)
                     #print detect
                     if detect['status']['code'] != 200:
-                        print 'error',detect['status']['code']
-                        sys.exit()
+                        print '  error',detect['status']['code'],'on',frame
+                        break
                     predictions = detect['body']['predictions']
                     with open(os.path.join(output_json,frame[:-4]+'.json'), 'w') as f:
                         json.dump(detect, f)
@@ -214,3 +173,51 @@ for root, dirs, files in os.walk(folder_input):
                                 cv2.rectangle(img,(int(bbox['xmin']),int(bbox['ymax'])),(int(bbox['xmax']),int(bbox['ymin'])),(0,0,0),2)
                                 cv2.putText(img,cat+' '+str("{0:.2f}".format(c['prob'])),(int(bbox['xmin']),int(bbox['ymax'])),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,0))
                         cv2.imwrite(os.path.join(output_jpg_annotated,frame[:-4]+'.jpg'),img)
+
+
+            # jpg_unannotated -> res.csv
+            image = Image.open(os.path.join(output_jpg_unannotated,name+'_0001.jpg'))
+            with open(output_resolution, 'w+') as res:
+                res.write(str(image.size[0])+','+str(image.size[1])+'\n')
+
+
+            # txt -> csv
+            print ('  Converting tagging txt into csv...')
+            with open(os.path.join(root,name+'.txt')) as txt:
+                with open(output_tags, 'w+') as csv:
+                    # empty csv file
+                    csv.truncate()
+                    # original situation
+                    minutes = 0
+                    seconds = 0
+                    status = 3
+                    # process per line
+                    for line in txt:
+                        line = line.replace(' ', '')
+                        if (len(line.strip()) != 0):
+                            # translate human format to machine format
+                            line = line.replace('nodig', '0')
+                            line = line.replace('dig', '1')
+                            line = line.replace('unusable', '2')                                                        
+                            line = line.replace(':', '')
+                            # if the assertion fails, the tag file contains an error
+                            assert len(line.strip()) == 5
+                            # grab from line
+                            prevminutes = minutes
+                            prevseconds = seconds
+                            prevstatus = status
+                            minutes = line[0:2]
+                            seconds = line[2:4]
+                            status = line[4:5]
+                            # calculate and push a new csv line, if not the first grab
+                            if (prevstatus != 3):
+                                pushstatus = prevstatus
+                                pushlength = (int(seconds) + int(minutes) * 60) - (int(prevseconds) + int(prevminutes) * 60)
+                                csv.write(str(pushlength)+','+str(pushstatus))
+                                csv.write('\n')
+                    # push the last line
+                    for subroot, subdirs, subfiles in os.walk(output_jpg_annotated):
+                        fulllength = len(subfiles)
+                        pushlength = fulllength - (int(seconds) + int(minutes) * 60)
+                        csv.write(str(pushlength)+','+str(status))
+                        csv.write('\n')
