@@ -26,7 +26,7 @@ from random import shuffle
 parser = argparse.ArgumentParser(description='Process input data for training a Single Shot Detector.')
 parser.add_argument('sourcedir', help='directory that is to be processed')
 parser.add_argument('-p', '--pretend', default=False, action='store_true', help='disable write mode')
-parser.add_argument('-o', '--overlap', type=float, default=0.99, help='maximum overlap two frames may have')
+parser.add_argument('-o', '--overlap', type=float, default=0.8, help='maximum overlap two frames may have')
 args = parser.parse_args()
 
 

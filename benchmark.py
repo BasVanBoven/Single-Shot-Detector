@@ -31,7 +31,7 @@ rootdir = os.getcwd()
 # caffe root directory
 rootcaffe = '/caffe'
 # test directory
-testdir = 'testsets_benchmark'
+testdir = 'testsets'
 emptydir = 'emptyscenes'
 testpath = os.path.join(rootdir, testdir)
 # determines which build to use

@@ -27,7 +27,6 @@ import sys
 import random
 import time
 import datetime
-import random
 import cv2
 import re
 import json
@@ -96,6 +95,26 @@ parameters_mllib = {'nclasses':7}
 parameters_output = {}
 detect = dd.delete_service('ssd')
 detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameters_input, parameters_mllib, parameters_output, 'supervised')
+
+
+# assert the txt files directly, just to be sure they are readable
+print ('Asserting all txt files in input folder')
+for root, dirs, files in os.walk(folder_input):
+    for name in files:
+        name, ext = os.path.splitext(name)
+        if (ext.lower().endswith(('.mp4', '.avi', '.mov')) and os.path.exists(os.path.join(root,name+'.txt'))):
+            with open(os.path.join(root,name+'.txt')) as txt:
+                # process per line
+                for line in txt:
+                    line = line.replace(' ', '')
+                    if (len(line.strip()) != 0):
+                        # translate human format to machine format
+                        line = line.replace('nodig', '0')
+                        line = line.replace('dig', '1')
+                        line = line.replace('unusable', '2')
+                        line = line.replace(':', '')
+                        # if the assertion fails, the tag file contains an error
+                        assert len(line.strip()) == 5
 
 
 # recursively process directory
@@ -187,10 +206,6 @@ for root, dirs, files in os.walk(folder_input):
                 with open(output_tags, 'w+') as csv:
                     # empty csv file
                     csv.truncate()
-                    # original situation
-                    minutes = 0
-                    seconds = 0
-                    status = 3
                     # process per line
                     for line in txt:
                         line = line.replace(' ', '')
@@ -198,26 +213,15 @@ for root, dirs, files in os.walk(folder_input):
                             # translate human format to machine format
                             line = line.replace('nodig', '0')
                             line = line.replace('dig', '1')
-                            line = line.replace('unusable', '2')                                                        
+                            line = line.replace('unusable', '2')
                             line = line.replace(':', '')
                             # if the assertion fails, the tag file contains an error
                             assert len(line.strip()) == 5
                             # grab from line
-                            prevminutes = minutes
-                            prevseconds = seconds
-                            prevstatus = status
                             minutes = line[0:2]
                             seconds = line[2:4]
                             status = line[4:5]
-                            # calculate and push a new csv line, if not the first grab
-                            if (prevstatus != 3):
-                                pushstatus = prevstatus
-                                pushlength = (int(seconds) + int(minutes) * 60) - (int(prevseconds) + int(prevminutes) * 60)
-                                csv.write(str(pushlength)+','+str(pushstatus))
-                                csv.write('\n')
-                    # push the last line
-                    for subroot, subdirs, subfiles in os.walk(output_jpg_annotated):
-                        fulllength = len(subfiles)
-                        pushlength = fulllength - (int(seconds) + int(minutes) * 60)
-                        csv.write(str(pushlength)+','+str(status))
-                        csv.write('\n')
+                            # calculate and push a new csv line
+                            pushlength = (int(seconds) + int(minutes) * 60) + 1
+                            csv.write(str(pushlength)+','+str(status))
+                            csv.write('\n')
