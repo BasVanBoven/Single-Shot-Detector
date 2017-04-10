@@ -6,5 +6,6 @@ testsets_benchmark/*
 temp/*
 video/*
 dedemodel/*
+seqproc/*
 frames.zip
 dd_client.pyc
