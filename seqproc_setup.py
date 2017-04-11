@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# setup.py - processes input data for training a Single Shot Detector
+# seqproc_setup.py - processes input data for training a Sequence Processor
 
 # input: a video folder containing json files: bounding boxes, tags and video resolution
 # prerequisites: sudo pip install sklearn
@@ -20,19 +20,17 @@ import matplotlib.pyplot as plt
 from random import shuffle
 from pprint import pprint
 from scipy.stats import mode
-from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.metrics import classification_report,confusion_matrix,fbeta_score
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier
 
 
 # handle input arguments
 parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
-parser.add_argument('-a', '--augment', default=True, action='store_true', help='use augmented data for training')
+parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
+parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
 parser.add_argument('-p', '--permutation', type=int, default=10, help='number of augmentation permutations to be generated')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
 parser.add_argument('-t', '--test', type=int, default=0.1, help='percentage of videos in test set')
+parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
 args = parser.parse_args()
 # window size needs to be uneven to make the majority vote function correctly
 assert(args.window % 2 != 0)
@@ -50,10 +48,6 @@ output_traintest = os.path.join(rootdir, 'seqproc', '04_traintest')
 output_train = os.path.join(output_traintest, 'train.csv')
 output_test = os.path.join(output_traintest, 'test.csv')
 output_train_augmented = os.path.join(output_traintest, 'train_augmented.csv')
-
-
-# global parameters
-number_of_vids = len(os.listdir(input_boxes))
 
 
 # initialize output directories
@@ -212,3 +206,18 @@ with open(output_test, 'wb') as f:
 # train/test split -> augmented train/test split
 print 'Augmenting train split...'
 #TODO
+
+
+# start training
+if args.stop == False:
+    # build command
+    cmd = 'python '+rootdir+'/seqproc_train.py'
+    cmd += ' -w '
+    cmd += str(args.window)
+    cmd += ' -c '
+    cmd += str(args.crossval)
+    if args.augment == True:
+        cmd += ' -a'
+    if args.debug == True:
+        cmd += ' -d'
+    os.system(cmd)

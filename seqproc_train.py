@@ -1,154 +1,134 @@
-'''
-Module: 03_analyse.ipynb
-Version: 0.2
-Python Version: 2.7.13
-Authors: Hakim Khalafi, <>
-Description:
-
-    This module takes the windowed master data file created by 02_split.ipynb and performs classification on it.
-    Some information is printed such as confusion matrices, F2 scores, cross validations, data size.
-    Finally the model is saved for re-use by sequence processor API.
-
-'''
+#!/usr/bin/python
+# seqproc_train.py - processes input data for training a Sequence Processor
 
 
-## Imports
-
+# imports
+import json
 import os
-from pprint import pprint
-import csv
-import numpy as np
-import pandas as pd
-
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import cross_val_score
-from sklearn.metrics import classification_report
-import matplotlib.pyplot as plt
-from sklearn.metrics import confusion_matrix
-import itertools
-from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier
-from sklearn.metrics import fbeta_score
 import pickle
 import time
+import itertools
+import csv
+import argparse
+import shutil
+import random
+import warnings
+import numpy as np
+import matplotlib.pyplot as plt
+from random import shuffle
+from pprint import pprint
+from scipy.stats import mode
+from sklearn.model_selection import train_test_split,cross_val_score
+from sklearn.metrics import classification_report,confusion_matrix,fbeta_score
+from sklearn.naive_bayes import GaussianNB
+from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier
 
 
-## Configurations
+# handle input arguments
+parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
+parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
+parser.add_argument('-b', '--balance', default=True, action='store_true', help='balance training set')
+parser.add_argument('-r', '--random', default=False, action='store_true', help='perform random classification')
+parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
+parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
+parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
+args = parser.parse_args()
+# window size needs to be uneven to make the majority vote function correctly
+assert(args.window % 2 != 0)
 
-test_split = 0.2
-n_estimators = 500
-N_window = 5
-cv = 5
 
-script_folder = os.path.realpath('.')
-datafile = '/master_data/N_master_windowed/md_reshaped_n' + str(N_window) + '.csv'
-total_path = script_folder + datafile
-model_folder = '/models/'
+# global variables and general pathing
+warnings.filterwarnings('ignore')
+estimators = 500
+rootdir = os.getcwd()
+model_folder = os.path.join(rootdir, 'seqproc', '05_model')
+model_file = os.path.join(model_folder, 'model.pkl')
+traintest_folder = os.path.join(rootdir, 'seqproc', '04_traintest')
+testset = np.genfromtxt(os.path.join(traintest_folder, 'test.csv'), delimiter=',')
+if args.augment:
+    trainset = np.genfromtxt(os.path.join(traintest_folder, 'train_augmented.csv'), delimiter=',')
+else:
+    trainset = np.genfromtxt(os.path.join(traintest_folder, 'train.csv'), delimiter=',')
 
-# Custom methods for scoring
 
+# initialize output directories
+if (os.path.exists(model_folder)):
+    shutil.rmtree(model_folder)
+os.makedirs(model_folder, 0755)
+
+
+# calculates f2 score
 def f2scorer(estimator, X, y):
     y_pred = estimator.predict(X)
     score = fbeta_score(y, y_pred, beta=2)
     return score
 
-def test_model(chosen_model, X_train, y_train, X_test, y_test, cv):
-    clf = chosen_model.fit(X_train, y_train)
 
-    scores = cross_val_score(clf, X_train, y_train, cv=cv)
-    print("Crossval F2: %0.2f (+/- %0.2f)" % (scores.mean(), scores.std() * 2))
-
-    # Accuracy scoring on test set
-    y_pred = clf.predict(X_test)
+# trains and tests a generated model
+def train_test(chosen_model, X_train, y_train, X_test, y_test):
+    classifier = chosen_model.fit(X_train, y_train)
+    scores = cross_val_score(classifier, X_train, y_train, cv=args.crossval)
+    print('Crossval F2: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+    # accuracy scoring on test set
+    y_pred = classifier.predict(X_test)
     score = fbeta_score(y_test, y_pred, beta=2)
     model_name = str(type(chosen_model).__name__)
     print(model_name + ' F2 score: ' + str(score))
-    return clf, score
+    return classifier, score
 
 
-## Read file
-
-df = pd.read_csv(total_path, header=None)
-print("Data points, features: " + str(df.shape))
-
-df = df.reset_index(drop=True)
-
-## Split set
-
-cols = df.shape[1]
-X = df.ix[:,:cols-2]
-Y = df[cols-1].astype(int)
-print("dig: "+  str(Y.value_counts()[1]) + ", nodig: " + str(Y.value_counts()[0]))
-# Split to train and test set
-
-X_train, X_test, y_train, y_test = train_test_split(X, Y, test_size=test_split)
-
-
-# Model testing
-
-#test_model(GaussianNB(), X_train, y_train, X_test, y_test, cv)
-#test_model(RandomForestClassifier(n_estimators=n_estimators), X_train, y_train, X_test, y_test, cv)
-clf,score = test_model(AdaBoostClassifier(n_estimators=n_estimators), X_train, y_train, X_test, y_test, cv)
-
-
-# Confusion matrix plot, function from scikit learn examples
-
-def plot_confusion_matrix(cm, classes,
-                          normalize=False,
-                          title='Confusion matrix',
-                          cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
-    plt.imshow(cm, interpolation='nearest', cmap=cmap)
-    plt.title(title)
-    plt.colorbar()
-    tick_marks = np.arange(len(classes))
-    plt.xticks(tick_marks, classes, rotation=45)
-    plt.yticks(tick_marks, classes)
-
+# prints a conusion matrix
+def print_confusion_matrix(cm, classes, normalize=False):
     if normalize:
         cm = cm.astype('float') / cm.sum(axis=1)[:, np.newaxis]
-        print("Normalized confusion matrix")
+        print('Normalized confusion matrix')
     else:
         print('Confusion matrix')
-
     print(cm)
 
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, cm[i, j],
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
 
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-
-y_pred = clf.predict(X_test)
-# Compute confusion matrix
+# balance training set
+if args.balance:
+    np.random.shuffle(trainset)
+    cutoff = min([np.count_nonzero(trainset[:,0]),trainset.shape[0] - np.count_nonzero(trainset[:,0])])
+    count_dig = 0
+    count_nodig = 0
+    # walk over trainset backwards to not mess up indexing
+    for i in range(trainset.shape[0]-1, -1, -1):
+        if int(trainset[i,0]) == 1:
+            count_dig += 1
+            if count_dig >= cutoff:
+                trainset = np.delete(trainset, i, 0)
+        else:
+            count_nodig +=1
+            if count_nodig >= cutoff:
+                trainset = np.delete(trainset, i, 0)
+# split data from classification
+X_train = trainset[:,1:]
+X_test = testset[:,1:]
+y_train = trainset[:,0].astype(int)
+y_test = testset[:,0].astype(int)
+# perform random classification, to validate training effect
+if args.random:
+    np.random.shuffle(y_train)
+    np.random.shuffle(y_test)
+# print debug output
+if args.debug:
+    print ('Train - shape: ' + str(X_train.shape) + ' ' + str(y_train.shape))
+    print ('Test - shape: ' + str(X_test.shape) + ' ' + str(y_test.shape))
+    print('Train - data points, features: ' + str(trainset.shape))
+    print('Test  - data points, features: ' + str(testset.shape))
+    print('Train - digging windows: '+  str(np.count_nonzero(y_train)) + ', nodig windows: ' + str(y_train.shape[0] - np.count_nonzero(y_train)))
+    print('Test  - digging windows: '+  str(np.count_nonzero(y_test)) + ', nodig windows: ' + str(y_test.shape[0] - np.count_nonzero(y_test)))
+# train and test a model
+print 'Model training started...'
+#classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
+#classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+y_pred = classifier.predict(X_test)
+# print confusion matrix
 cnf_matrix = confusion_matrix(y_test, y_pred)
 np.set_printoptions(precision=2)
-
-# Plot confusion matrix
-plt.figure()
-plot_confusion_matrix(cnf_matrix, classes=['No dig','Dig'],
-                      title='Confusion matrix')
-
-plt.show()
-
-
-# Save model to disk
-timestr = time.strftime("%Y%m%d-%H%M%S")
-
-filename = str(type(clf).__name__) + '_N' + str(N_window) + '_t' + timestr + '_F2_' + str(score*1000)[0:3] + '.pkl'
-print("Saved model to: /models/" + filename)
-pickle.dump(clf,open(script_folder + model_folder + filename, "wb" ) , protocol=2)
-
-
-# ToDo: Probably want to make the output that looks like this:
-# Crossval F2: 0.96 (+/- 0.00)
-# AdaBoostClassifier F2 score: 0.99153705398
-# Automatically save to a .txt with the same model name as saved above
-# For now, saves F2 score in filename..    
+print_confusion_matrix(cnf_matrix, classes=['No dig', 'Dig'])
+# save model to disk
+pickle.dump(classifier, open(model_file, 'wb'), protocol=2)
