@@ -17,7 +17,6 @@ import random
 import PIL
 import time
 import datetime
-import random
 import caffe
 import xml.etree.ElementTree as ET
 from caffe.proto import caffe_pb2

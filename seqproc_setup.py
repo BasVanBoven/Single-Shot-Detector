@@ -14,6 +14,7 @@ import itertools
 import csv
 import argparse
 import shutil
+import random
 import numpy as np
 import matplotlib.pyplot as plt
 from random import shuffle
@@ -45,10 +46,10 @@ input_resolution = os.path.join(rootdir, 'video', 'output', 'resolution')
 output_classifications = os.path.join(rootdir, 'seqproc', '01_classifications')
 output_frames = os.path.join(rootdir, 'seqproc', '02_frames')
 output_windows = os.path.join(rootdir, 'seqproc', '03_windows')
-output_split_train = os.path.join(rootdir, 'seqproc', '04_split', 'train')
-output_split_test = os.path.join(rootdir, 'seqproc', '04_split', 'test')
-output_augment_train = os.path.join(rootdir, 'seqproc', '05_augmented', 'train')
-output_augment_test = os.path.join(rootdir, 'seqproc', '05_augmented', 'test')
+output_traintest = os.path.join(rootdir, 'seqproc', '04_traintest')
+output_train = os.path.join(output_traintest, 'train.csv')
+output_test = os.path.join(output_traintest, 'test.csv')
+output_train_augmented = os.path.join(output_traintest, 'train_augmented.csv')
 
 
 # global parameters
@@ -56,7 +57,7 @@ number_of_vids = len(os.listdir(input_boxes))
 
 
 # initialize output directories
-output_folders = [output_classifications, output_frames, output_windows, output_split_train, output_split_test, output_augment_train, output_augment_test]
+output_folders = [output_classifications, output_frames, output_windows, output_traintest]
 for folder in output_folders:
     if (os.path.exists(folder)):
         shutil.rmtree(folder)
@@ -187,8 +188,25 @@ for filename in sorted(os.listdir(output_frames)):
 
 
 # window csv -> train/test split
-print 'Converting window CSV to train/test split...'
-#TODO
+print 'Converting window CSVs to train/test split...'
+# determine the number of test videos
+number_train_vids = int(len(os.listdir(output_windows)) * (1-args.test))
+vids_list = os.listdir(output_windows)
+random.shuffle(vids_list)
+train_list = vids_list[0:number_train_vids]
+test_list = vids_list[number_train_vids:]
+# write train output file
+with open(output_train, 'wb') as f:
+    for filename in train_list:
+        with open(os.path.join(output_windows, filename)) as infile:
+            for line in infile:
+                f.write(line)
+# write test output file
+with open(output_test, 'wb') as f:
+    for filename in test_list:
+        with open(os.path.join(output_windows, filename)) as infile:
+            for line in infile:
+                f.write(line)
 
 
 # train/test split -> augmented train/test split
