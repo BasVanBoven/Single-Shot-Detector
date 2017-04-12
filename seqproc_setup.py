@@ -29,7 +29,7 @@ parser.add_argument('-a', '--augment', default=False, action='store_true', help=
 parser.add_argument('-p', '--permutations', type=int, default=10, help='number of augmentation permutations to be generated')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
-parser.add_argument('-t', '--test', type=int, default=0.2, help='percentage of videos in test set')
+parser.add_argument('-t', '--test', type=float, default=0.2, help='percentage of videos in test set')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
 args = parser.parse_args()
 # window size needs to be uneven to make the majority vote function correctly
@@ -71,36 +71,8 @@ def is_Cy(i):
     if i % 10 == 3:
         return True
     return False
-def is_delta_Cy(i):
-    if i % 10 == 4:
-        return True
-    return False
-def is_width(i):
-    if i % 10 == 5:
-        return True
-    return False
-def is_delta_width(i):
-    if i % 10 == 6:
-        return True
-    return False
-def is_height(i):
-    if i % 10 == 7:
-        return True
-    return False
-def is_delta_height(i):
-    if i % 10 == 8:
-        return True
-    return False
-def is_delta(i):
-    if i in [2,4,6,8]:
-        return True
-    return False
-def is_coordinate(i):
-    if i in [1,3]:
-        return True
-    return False
-def is_widthheight(i):
-    if i in [5,7]:
+def is_not_pred_conf(i):
+    if 1 <= i <= 8:
         return True
     return False
 def find_window_limits(row):
@@ -109,18 +81,18 @@ def find_window_limits(row):
     xmax = 0
     ymax = 0
     for i in range(row.shape[0]):
-        if is_Cx(i):
+        if is_Cx(i) and row[i+8] > 0:
             xmax = max(xmax,row[i]+0.5*row[i+4])
             xmin = min(xmin,row[i]-0.5*row[i+4])
-        if is_Cy(i):
+        if is_Cy(i) and row[i+6] > 0:
             ymax = max(ymax,row[i]+0.5*row[i+4])
             ymin = min(ymin,row[i]-0.5*row[i+4])
     return xmin, xmax, ymin, ymax
 def move_boxes(row, shift_w, shift_h):
     for i in range(row.shape[0]):
-        if is_Cx(i):
+        if is_Cx(i) and row[i+8] > 0:
             row[i] = row[i] + shift_w
-        if is_Cy(i):
+        if is_Cy(i) and row[i+6] > 0:
             row[i] = row[i] + shift_h
     return row
 
@@ -275,37 +247,41 @@ if args.augment:
     print 'Augmenting train split...'
     # open train split
     original = np.genfromtxt(output_train, delimiter=',')
-    # debug line limits to 100 samples: remove this in the end
-    original = original[0:100,:]
-    # initialize empty array
-    augmented = np.empty((0,original.shape[1]))
-    # do for each window
-    for row in original:
-        # generate a given number of permutations
-        for perm in range(args.permutations):
-            # horizontal flip (50% chance)
-            if random.random() < .5:
-                for i in range(row.shape[0]):
-                    if is_Cx(i):
-                        row[i] = 1 - row[i]
-                    if is_delta_Cx(i):
-                        row[i] = row[i] * -1
-            # place window in top left corner
-            xmin, xmax, ymin, ymax = find_window_limits(row)
-            row = move_boxes(row, -xmin, -ymin)
-            # resize window
-            #TODO
-            # move window
-            xmin, xmax, ymin, ymax = find_window_limits(row)
-            shift_w = random.uniform(0, 1-xmax)
-            shift_h = random.uniform(0, 1-ymax)
-            row = move_boxes(row, shift_w, shift_h)
-            # push new window to augmented array
-            augmented = np.vstack([augmented, row])
-    # write csv
+    # limits to 100 samples and also pus: remove this in the end
+    #original = original[0:100,:]
+    # open output file
     with open(output_train_augmented, 'wb') as f:
         writer = csv.writer(f)
-        writer.writerows(augmented)
+        # do for each window
+        for row in original:
+            # generate a given number of permutations
+            for perm in range(args.permutations):
+                # horizontal flip (50% chance)
+                if random.random() < .5:
+                    for i in range(row.shape[0]):
+                        if is_Cx(i):
+                            row[i] = 1 - row[i]
+                        if is_delta_Cx(i):
+                            row[i] = row[i] * -1
+                # place objects in top left corner
+                xmin, xmax, ymin, ymax = find_window_limits(row)
+                row = move_boxes(row, -xmin, -ymin)
+                # resize objects
+                # 1.3 and 0.7 are arbitrary min/max thresholds
+                xmin, xmax, ymin, ymax = find_window_limits(row)
+                maxscale = min(1/xmax, 1/ymax, 1.3)
+                minscale = 0.7
+                scale = random.uniform(minscale, maxscale)
+                for i in range(row.shape[0]):
+                    if is_not_pred_conf(i):
+                        row[i] = row[i] * scale
+                # move objects
+                xmin, xmax, ymin, ymax = find_window_limits(row)
+                shift_w = random.uniform(0, 1-xmax)
+                shift_h = random.uniform(0, 1-ymax)
+                row = move_boxes(row, shift_w, shift_h)
+                # write line to csv
+                writer.writerow(row)
 
 
 # start training
