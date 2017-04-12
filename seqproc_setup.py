@@ -29,7 +29,7 @@ parser.add_argument('-a', '--augment', default=False, action='store_true', help=
 parser.add_argument('-p', '--permutations', type=int, default=10, help='number of augmentation permutations to be generated')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
-parser.add_argument('-t', '--test', type=int, default=0.1, help='percentage of videos in test set')
+parser.add_argument('-t', '--test', type=int, default=0.2, help='percentage of videos in test set')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
 args = parser.parse_args()
 # window size needs to be uneven to make the majority vote function correctly
@@ -58,7 +58,7 @@ for folder in output_folders:
     os.makedirs(folder, 0755)
 
 
-# helper functions
+# helper functions for augmentation steps
 def is_Cx(i):
     if i % 10 == 1:
         return True
@@ -103,6 +103,26 @@ def is_widthheight(i):
     if i in [5,7]:
         return True
     return False
+def find_window_limits(row):
+    xmin = 1
+    ymin = 1
+    xmax = 0
+    ymax = 0
+    for i in range(row.shape[0]):
+        if is_Cx(i):
+            xmax = max(xmax,row[i]+0.5*row[i+4])
+            xmin = min(xmin,row[i]-0.5*row[i+4])
+        if is_Cy(i):
+            ymax = max(ymax,row[i]+0.5*row[i+4])
+            ymin = min(ymin,row[i]-0.5*row[i+4])
+    return xmin, xmax, ymin, ymax
+def move_boxes(row, shift_w, shift_h):
+    for i in range(row.shape[0]):
+        if is_Cx(i):
+            row[i] = row[i] + shift_w
+        if is_Cy(i):
+            row[i] = row[i] + shift_h
+    return row
 
 
 # tags -> classification
@@ -255,6 +275,9 @@ if args.augment:
     print 'Augmenting train split...'
     # open train split
     original = np.genfromtxt(output_train, delimiter=',')
+    # debug line limits to 100 samples: remove this in the end
+    original = original[0:100,:]
+    # initialize empty array
     augmented = np.empty((0,original.shape[1]))
     # do for each window
     for row in original:
@@ -268,11 +291,15 @@ if args.augment:
                     if is_delta_Cx(i):
                         row[i] = row[i] * -1
             # place window in top left corner
-            #TODO
+            xmin, xmax, ymin, ymax = find_window_limits(row)
+            row = move_boxes(row, -xmin, -ymin)
             # resize window
             #TODO
             # move window
-            #TODO
+            xmin, xmax, ymin, ymax = find_window_limits(row)
+            shift_w = random.uniform(0, 1-xmax)
+            shift_h = random.uniform(0, 1-ymax)
+            row = move_boxes(row, shift_w, shift_h)
             # push new window to augmented array
             augmented = np.vstack([augmented, row])
     # write csv
