@@ -26,7 +26,7 @@ from scipy.stats import mode
 parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
 parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
-parser.add_argument('-p', '--permutation', type=int, default=10, help='number of augmentation permutations to be generated')
+parser.add_argument('-p', '--permutations', type=int, default=10, help='number of augmentation permutations to be generated')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
 parser.add_argument('-t', '--test', type=int, default=0.1, help='percentage of videos in test set')
@@ -56,6 +56,53 @@ for folder in output_folders:
     if (os.path.exists(folder)):
         shutil.rmtree(folder)
     os.makedirs(folder, 0755)
+
+
+# helper functions
+def is_Cx(i):
+    if i % 10 == 1:
+        return True
+    return False
+def is_delta_Cx(i):
+    if i % 10 == 2:
+        return True
+    return False
+def is_Cy(i):
+    if i % 10 == 3:
+        return True
+    return False
+def is_delta_Cy(i):
+    if i % 10 == 4:
+        return True
+    return False
+def is_width(i):
+    if i % 10 == 5:
+        return True
+    return False
+def is_delta_width(i):
+    if i % 10 == 6:
+        return True
+    return False
+def is_height(i):
+    if i % 10 == 7:
+        return True
+    return False
+def is_delta_height(i):
+    if i % 10 == 8:
+        return True
+    return False
+def is_delta(i):
+    if i in [2,4,6,8]:
+        return True
+    return False
+def is_coordinate(i):
+    if i in [1,3]:
+        return True
+    return False
+def is_widthheight(i):
+    if i in [5,7]:
+        return True
+    return False
 
 
 # tags -> classification
@@ -91,8 +138,8 @@ for root, dirs, files in os.walk(input_boxes):
             writer.writerow(classifications)
 
 
-# video frame jsons -> frames csv
-print 'Converting video frame JSON to frames CSV...'
+# video frame jsons -> frame csv
+print 'Converting video frame JSONs to frame CSV...'
 for root, dirs, files in os.walk(input_boxes):
     for video in sorted(dirs):
         # video specific pathing
@@ -140,8 +187,8 @@ for root, dirs, files in os.walk(input_boxes):
                 writer.writerow(detections)
 
 
-# frames csv -> windows csv
-print 'Converting frames CSV to window CSV...'
+# frame csvs -> window csvs
+print 'Converting frame CSVs to window CSVs...'
 for filename in sorted(os.listdir(output_frames)):
     # open frames csv file and make sure it contains more than one frame
     frames = np.genfromtxt(os.path.join(output_frames, filename), delimiter=',')
@@ -181,7 +228,7 @@ for filename in sorted(os.listdir(output_frames)):
                 bufferlength = 0
 
 
-# window csv -> train/test split
+# window csvs -> train/test split
 print 'Converting window CSVs to train/test split...'
 # determine the number of test videos
 number_train_vids = int(len(os.listdir(output_windows)) * (1-args.test))
@@ -204,8 +251,34 @@ with open(output_test, 'wb') as f:
 
 
 # train/test split -> augmented train/test split
-print 'Augmenting train split...'
-#TODO
+if args.augment:
+    print 'Augmenting train split...'
+    # open train split
+    original = np.genfromtxt(output_train, delimiter=',')
+    augmented = np.empty((0,original.shape[1]))
+    # do for each window
+    for row in original:
+        # generate a given number of permutations
+        for perm in range(args.permutations):
+            # horizontal flip (50% chance)
+            if random.random() < .5:
+                for i in range(row.shape[0]):
+                    if is_Cx(i):
+                        row[i] = 1 - row[i]
+                    if is_delta_Cx(i):
+                        row[i] = row[i] * -1
+            # place window in top left corner
+            #TODO
+            # resize window
+            #TODO
+            # move window
+            #TODO
+            # push new window to augmented array
+            augmented = np.vstack([augmented, row])
+    # write csv
+    with open(output_train_augmented, 'wb') as f:
+        writer = csv.writer(f)
+        writer.writerows(augmented)
 
 
 # start training
