@@ -8,12 +8,11 @@
 # sudo apt-get install software-properties-common
 # sudo add-apt-repository ppa:mc3man/trusty-media
 # sudo apt-get update
-# sudo apt-get install ffmpeg
-# sudo apt-get install python-opencv
-# sudo apt-get install python-imaging
+# sudo apt-get install ffmpeg python-opencv python-imaging
 
 # assumes DeepDetect Docker container is running, run following command on host OS:
 # sudo nvidia-docker run -i -t -p 8080:8080 -v /home/ubuntu/dockershare:/dockershare:rshared beniz/deepdetect_gpu
+# sudo nvidia-docker exec -i -t <ID> /bin/bash
 
 
 # imports

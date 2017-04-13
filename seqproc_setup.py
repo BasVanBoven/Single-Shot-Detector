@@ -203,8 +203,9 @@ for filename in sorted(os.listdir(output_frames)):
             # otherwise, add the frame to the window
             bufferlength = bufferlength + 1
             classificationbuffer.extend([frames[i][0]])
+            # do for each frame value except the classification
             for j in range(1, frames[i][:].shape[0]):
-                # difference only from second element, otherwise, fill zeroes
+                # difference when not the first frame, otherwise, fill zeroes
                 if bufferlength == 1:
                     windowbuffer.extend(np.append([frames[i][j]], [0]))
                 else:
@@ -247,7 +248,7 @@ if args.augment:
     print 'Augmenting train split...'
     # open train split
     original = np.genfromtxt(output_train, delimiter=',')
-    # limits to 100 samples and also pus: remove this in the end
+    # debug: limits to 100 samples, remove this in the end
     #original = original[0:100,:]
     # open output file
     with open(output_train_augmented, 'wb') as f:

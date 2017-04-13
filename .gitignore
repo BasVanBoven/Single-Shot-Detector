@@ -9,3 +9,4 @@ dedemodel/*
 seqproc/*
 frames.zip
 dd_client.pyc
+seqproc_serv_old.py

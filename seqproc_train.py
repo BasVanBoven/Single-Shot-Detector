@@ -120,6 +120,11 @@ if args.debug:
     print('Test  - data points, features: ' + str(testset.shape))
     print('Train - digging windows: '+  str(np.count_nonzero(y_train)) + ', nodig windows: ' + str(y_train.shape[0] - np.count_nonzero(y_train)))
     print('Test  - digging windows: '+  str(np.count_nonzero(y_test)) + ', nodig windows: ' + str(y_test.shape[0] - np.count_nonzero(y_test)))
+# save model log
+model_log = np.array([ ['Window Size','Augmentation','Cross Validation Splits','Balanced Dataset','Random Classification'] , [args.window,args.augment,args.crossval,args.balance,args.random] ])
+with open(os.path.join(model_folder, 'model.log'), 'wb') as f:
+    writer = csv.writer(f)
+    writer.writerows(model_log)
 # train and test a model
 print 'Model training started...'
 #classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
