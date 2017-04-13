@@ -149,6 +149,7 @@ for root, dirs, files in os.walk(input_boxes):
             # get the strongest detection for each category
             frame_data = json.load(open(os.path.join(boxes_folder, frame), 'r'))
             object_dict = {}
+            # do for each object            
             for detected_object in frame_data['body']['predictions'][0]['classes']:
                 category = detected_object['cat']
                 if category in object_dict:
@@ -160,6 +161,7 @@ for root, dirs, files in os.walk(input_boxes):
             detections = [classifications[i]]
             # take only excavator parts to the sequence processor
             ordering = ['cabin', 'forearm', 'upperarm', 'wheelbase', 'attachment-bucket', 'attachment-breaker']
+            # write highest detections to array
             for item in ordering:
                 if item in object_dict:
                     # translate to new format

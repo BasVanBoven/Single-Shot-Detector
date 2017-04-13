@@ -20,7 +20,6 @@ from flask import request, url_for, jsonify
 # handle input arguments
 parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
 parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
-#parser.add_argument('-r', '--round', type=int, default=5, help='number of significant digits in return')
 args = parser.parse_args()
 
 
@@ -33,15 +32,12 @@ model_log = os.path.join(rootdir,'seqproc', '05_model', 'model.log')
 # initialize window size, needs to be uneven to make the majority vote function correctly
 model_params = np.genfromtxt(model_log, delimiter=',')
 windowsize = model_params[1][0]
-print windowsize
 assert(windowsize % 2 != 0)
 
 
 # initialize model server
 app = FlaskAPI(__name__)
 classifier = pickle.load(open(model_file, 'rb'))
-
-
 @app.route('/detect_movement/', methods=['POST'])
 def detect_movement():
 
@@ -72,12 +68,13 @@ def detect_movement():
         json_data = json_data['seq']
 
         # convert json frame sequence to window
-        window = []
+        window_undifferenced = []
         # do for each frame
         for frame in json_data:
             # get the strongest detection for each category
             frame_data = json.load(open(os.path.join(boxes_folder, frame), 'r'))
             object_dict = {}
+            # do for each object
             for detected_object in frame['body']['predictions'][0]['classes']:
                 category = detected_object['cat']
                 if category in object_dict:
@@ -87,6 +84,7 @@ def detect_movement():
                     object_dict[category] = detected_object
             # take only excavator parts to the sequence processor
             ordering = ['cabin', 'forearm', 'upperarm', 'wheelbase', 'attachment-bucket', 'attachment-breaker']
+            # write highest detections to array
             for item in ordering:
                 if item in object_dict:
                     # translate to new format
@@ -96,51 +94,25 @@ def detect_movement():
                     W = (obj['bbox']['xmax'] - obj['bbox']['xmin']) / res_x
                     H = (obj['bbox']['ymin'] - obj['bbox']['ymax']) / res_y
                     Conf = obj['prob']
-                    detections.extend([C_X, C_Y, W, H, Conf])
+                    window_undifferenced.extend([C_X, C_Y, W, H, Conf])
                 else:
                     # when an excavator part is not detected
-                    detections.extend([0,0,0,0,0])
-            # push detections to window
-            #TODO
-            with open(os.path.join(output_frames, video+'.csv'), 'a') as f:
-                writer = csv.writer(f)
-                writer.writerow(detections)
-
-        # frame csvs -> window csvs
-        for filename in sorted(os.listdir(output_frames)):
-            # make sure the window contains more than one frame
-            assert(window.size > 31)
-            # open output file, i.e., the window csv
-            with open(os.path.join(output_windows, filename), 'wb') as f:
-                writer = csv.writer(f)
-                # initialize window buffer
-                windowbuffer = []
-                classificationbuffer = []
-                bufferlength = 0
-                # do for each frame, i.e., each line
-                for i in range(window.shape[0]):
-                    # otherwise, add the frame to the window
-                    bufferlength = bufferlength + 1
-                    classificationbuffer.extend([window[i][0]])
-                    # do for each frame value
-                    for j in range(0, window[i][:].shape[0]):
-                        # difference when not the first frame, otherwise, fill zeroes
-                        if bufferlength == 1:
-                            windowbuffer.extend(np.append([window[i][j]], [0]))
-                        else:
-                            windowbuffer.extend(np.append([window[i][j]], [window[i][j] - window[i-1][j]]))
-                    # make sure the window size
-                    assert(bufferlength == windowsize)
-
-        '''# Transform N x 60 matrix intro 1 X (N*60) row vector for inference
-        X = X.stack().to_frame().T
-
-        # Reset row index and column names
-        X = X.reset_index(drop=True)
-        X.columns = range(X.shape[1])'''
+                    window_undifferenced.extend([0,0,0,0,0])
+        # make sure the list length is correct
+        assert(len(window_undifferenced) == windowsize * 30)
+        # difference each list item
+        window_differenced = []
+        for i in range(0, len(window)):
+            # difference when not the first frame, otherwise, fill zeroes
+            if i < 30:
+                window_differenced.extend([window_undifferenced[i], 0])
+            else:
+                window_differenced.extend([window_undifferenced[i], window_undifferenced[i] - window_undifferenced[i-30]])
+        # make sure the list length is still correct
+        assert(len(window_differenced) == windowsize * 60)
 
         # predict and return result
-        movement = bool(classifier.predict(X)[0])
+        movement = bool(classifier.predict(window_differenced))
         return jsonify({'movement': movement, 'err': ''}), 200
 
 
