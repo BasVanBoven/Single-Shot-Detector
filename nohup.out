@@ -132,3 +132,22 @@ NameError: global name 'window' is not defined
 /usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
   DeprecationWarning)
 127.0.0.1 - - [13/Apr/2017 14:14:34] "POST /detect_movement/ HTTP/1.1" 200 -
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [13/Apr/2017 14:26:59] "POST /detect_movement/ HTTP/1.1" 200 -
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [13/Apr/2017 14:27:34] "POST /detect_movement/ HTTP/1.1" 200 -
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [13/Apr/2017 14:28:14] "POST /detect_movement/ HTTP/1.1" 200 -
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [13/Apr/2017 14:28:35] "POST /detect_movement/ HTTP/1.1" 200 -
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [13/Apr/2017 14:28:45] "POST /detect_movement/ HTTP/1.1" 200 -

@@ -243,6 +243,10 @@ with open(output_test, 'wb') as f:
         with open(os.path.join(output_windows, filename)) as infile:
             for line in infile:
                 f.write(line)
+# write test list to csv
+with open(os.path.join(output_traintest, 'test_list.csv'), 'wb') as f:
+    writer = csv.writer(f)
+    writer.writerow(test_list)
 
 
 # train/test split -> augmented train/test split
