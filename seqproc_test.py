@@ -12,12 +12,12 @@ import requests
 import json
 import argparse
 import numpy as np
-from pprint import pprint
 
 
 # handle input arguments
 parser = argparse.ArgumentParser(description='Test a Sequence Processor.')
 parser.add_argument('firstframe', help='first frame of window that is to be tested, without extension')
+parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
 args = parser.parse_args()
 
 
@@ -55,5 +55,7 @@ for i in range(firstframenumber,firstframenumber+int(windowsize)):
 
 # send POST request and process result
 headers = {'content-type': 'application/json'}
+if args.debug:
+    print json_batch
 r = requests.post(server_url, data=json.dumps(json_batch), headers=headers)
 print(r.text)
