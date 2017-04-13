@@ -1,7 +1,6 @@
 #!/usr/bin/python
-# seqproc_serv.py - hosts a movement detector model over API via flask.
+# seqproc_serv.py - hosts a movement detector model over API via flask
 
-# input: a video folder containing json files: bounding boxes, tags and video resolution
 # prerequisites: sudo pip install flask-api
 
 
@@ -9,18 +8,10 @@
 import os
 import sys
 import json
-import random
 import pickle
-import argparse
 import numpy as np
 from flask_api import FlaskAPI, status, exceptions
 from flask import request, url_for, jsonify
-
-
-# handle input arguments
-parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
-parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
-args = parser.parse_args()
 
 
 # general pathing

@@ -1,70 +1,59 @@
-'''
-Module: 04_sequence_tester.ipynb
-Version: 0.2
-Python Version: 2.7.13
-Authors: Hakim Khalafi, <>
-Description:
+#!/usr/bin/python
+# seqproc_test.py - sends test requests to the sequence_processor API
 
-    This module sends test requests to sequence_processor API
-'''
+# input: first frame of window that is to be tested, without extension
 
-## Imports
 
+# imports
 import os
-import os.path
-from pprint import pprint
 import csv
-import numpy as np
-import pandas as pd
 import json
-import random
 import requests
 import json
-
-## Configurations
-
-N = 5+1
-sequence_processor_url = 'http://127.0.0.1:5000/detect_movement/'
-
-script_folder = os.path.realpath('.')
-json_folder = '/json/'
-resolution_folder = '/resolution/'
-video_name = 'record_20170307_batch2_000_2'
-test_folder = '/' + video_name + '/'
-
-resolution_csv = video_name + '.csv'
-
-res_df = pd.read_csv(script_folder + resolution_folder + resolution_csv, header=None)
-xres = int(res_df[0][0])
-yres = int(res_df[1][0])
-
-total_path = script_folder + json_folder + test_folder
+import argparse
+import numpy as np
+from pprint import pprint
 
 
-## Test random sequence of N jsons, picked from test_folder
-
-files = [name for name in os.listdir(total_path) if os.path.isfile(total_path + name)]
-
-batches = int(len(files) / N) # Truncate last samples as they wont be a full batch
-
-chosen_batch = random.randint(0, batches)
-
-json_batch =  {'seq': [], 'res': {'X': xres, 'Y': yres}}
-
-for j in range(0,N):
-    file = files[chosen_batch*N + j]
-    print(file)
-
-    with open(total_path + file, 'r') as json_in:
-        json_batch['seq'].append(json.load(json_in))
-
-#with open('result.json', 'w') as fp:
-    #json.dump(json_batch, fp)
+# handle input arguments
+parser = argparse.ArgumentParser(description='Test a Sequence Processor.')
+parser.add_argument('firstframe', help='first frame of window that is to be tested, without extension')
+args = parser.parse_args()
 
 
+# general pathing
+rootdir = os.getcwd()
+video = args.firstframe[:-5] # strip last 5 characters from string
+firstframenumber = int(args.firstframe[-4:]) # only take last 8-5 characters from string
+server_url = 'http://127.0.0.1:5000/detect_movement/'
+json_folder = os.path.join(rootdir, 'video', 'output', 'json', video)
+resolution_csv = os.path.join(rootdir, 'video', 'output', 'resolution', video+'.csv')
+model_log = os.path.join(rootdir,'seqproc', '05_model', 'model.log')
+
+
+# initialize window size, needs to be uneven to make the majority vote function correctly
+model_params = np.genfromtxt(model_log, delimiter=',')
+windowsize = model_params[1][0]
+assert(windowsize % 2 != 0)
+
+
+# get video resolution
+resolution = np.genfromtxt(resolution_csv, delimiter=',', dtype=int)
+res_x = resolution[0]
+res_y = resolution[1]
+
+
+# prepare request object
+json_batch =  {'seq': [], 'res': {'X': res_x, 'Y': res_y}}
+for i in range(firstframenumber,firstframenumber+int(windowsize)):
+    i_formatted = str(i).zfill(4)
+    frame_json_path = os.path.join(json_folder, video+'_'+str(i_formatted)+'.json')
+    with open(frame_json_path, 'r') as json_file:
+        assert(json_file)
+        json_batch['seq'].append(json.load(json_file))
+
+
+# send POST request and process result
 headers = {'content-type': 'application/json'}
-
-r = requests.post(sequence_processor_url, data=json.dumps(json_batch), headers=headers)
-#dictionary = json.loads(r.text)
-#df = pd.DataFrame(dictionary['err'])
+r = requests.post(server_url, data=json.dumps(json_batch), headers=headers)
 print(r.text)

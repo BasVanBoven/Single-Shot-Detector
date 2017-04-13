@@ -23,7 +23,7 @@ from scipy.stats import mode
 
 
 # handle input arguments
-parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
+parser = argparse.ArgumentParser(description='Process input data for a Sequence Processor.')
 parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
 parser.add_argument('-p', '--permutations', type=int, default=10, help='number of augmentation permutations to be generated')
@@ -149,7 +149,7 @@ for root, dirs, files in os.walk(input_boxes):
             # get the strongest detection for each category
             frame_data = json.load(open(os.path.join(boxes_folder, frame), 'r'))
             object_dict = {}
-            # do for each object            
+            # do for each object
             for detected_object in frame_data['body']['predictions'][0]['classes']:
                 category = detected_object['cat']
                 if category in object_dict:

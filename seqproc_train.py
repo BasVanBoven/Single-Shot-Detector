@@ -25,7 +25,7 @@ from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier
 
 
 # handle input arguments
-parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
+parser = argparse.ArgumentParser(description='Train a Sequence Processor.')
 parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
 parser.add_argument('-b', '--balance', default=True, action='store_true', help='balance training set')
 parser.add_argument('-r', '--random', default=False, action='store_true', help='perform random classification')
