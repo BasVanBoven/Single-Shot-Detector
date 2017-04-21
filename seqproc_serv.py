@@ -6,8 +6,6 @@
 
 # imports
 import os
-import sys
-import json
 import pickle
 import numpy as np
 import seqproc_common as sp
@@ -17,8 +15,8 @@ from flask import request, url_for, jsonify
 
 # general pathing
 rootdir = os.getcwd()
-model_file = os.path.join(rootdir,'seqproc', '05_model', 'model.pkl')
-model_log = os.path.join(rootdir,'seqproc', '05_model', 'model.log')
+model_file = os.path.join(rootdir,'seqproc', '04_model', 'model.pkl')
+model_log = os.path.join(rootdir,'seqproc', '04_model', 'model.log')
 
 
 # initialize window size, needs to be uneven to make the majority vote function correctly

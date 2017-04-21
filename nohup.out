@@ -571,3 +571,75 @@ TypeError: extend() takes exactly one argument (0 given)
  * Restarting with stat
  * Debugger is active!
  * Debugger PIN: 206-755-036
+ * Detected change in '/dockershare/ssd/seqproc_common.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [21/Apr/2017 12:27:26] "POST /detect_movement/ HTTP/1.1" 200 -
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [21/Apr/2017 12:28:15] "POST /detect_movement/ HTTP/1.1" 200 -
+ * Detected change in '/dockershare/ssd/seqproc_common.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [21/Apr/2017 12:28:51] "POST /detect_movement/ HTTP/1.1" 200 -
+ * Detected change in '/dockershare/ssd/seqproc_common.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+ * Detected change in '/dockershare/ssd/seqproc_common.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [21/Apr/2017 12:29:52] "POST /detect_movement/ HTTP/1.1" 200 -
+ * Detected change in '/dockershare/ssd/seqproc_common.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+ * Detected change in '/dockershare/ssd/seqproc_common.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+ * Detected change in '/dockershare/ssd/seqproc_serv.py', reloading
+ * Restarting with stat
+Traceback (most recent call last):
+  File "seqproc_serv.py", line 22, in <module>
+    model_params = np.genfromtxt(model_log, delimiter=',')
+NameError: name 'np' is not defined
+Traceback (most recent call last):
+  File "seqproc_serv.py", line 22, in <module>
+    model_params = np.genfromtxt(model_log, delimiter=',')
+NameError: name 'np' is not defined
+ * Running on http://127.0.0.1:5000/ (Press CTRL+C to quit)
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [21/Apr/2017 12:31:13] "POST /detect_movement/ HTTP/1.1" 200 -
+ * Detected change in '/dockershare/ssd/seqproc_serv.py', reloading
+ * Restarting with stat
+ * Debugger is active!
+ * Debugger PIN: 206-755-036
+/usr/local/lib/python2.7/dist-packages/sklearn/utils/validation.py:395: DeprecationWarning: Passing 1d arrays as data is deprecated in 0.17 and will raise ValueError in 0.19. Reshape your data either using X.reshape(-1, 1) if your data has a single feature or X.reshape(1, -1) if it contains a single sample.
+  DeprecationWarning)
+127.0.0.1 - - [21/Apr/2017 12:32:51] "POST /detect_movement/ HTTP/1.1" 200 -

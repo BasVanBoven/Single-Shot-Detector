@@ -43,16 +43,15 @@ input_boxes = os.path.join(rootdir, 'video', 'output', 'json')
 input_tags = os.path.join(rootdir, 'video', 'output', 'tags')
 input_resolution = os.path.join(rootdir, 'video', 'output', 'resolution')
 output_classifications = os.path.join(rootdir, 'seqproc', '01_classifications')
-output_frames = os.path.join(rootdir, 'seqproc', '02_frames')
-output_windows = os.path.join(rootdir, 'seqproc', '03_windows')
-output_traintest = os.path.join(rootdir, 'seqproc', '04_traintest')
+output_windows = os.path.join(rootdir, 'seqproc', '02_windows')
+output_traintest = os.path.join(rootdir, 'seqproc', '03_traintest')
 output_train = os.path.join(output_traintest, 'train.csv')
 output_test = os.path.join(output_traintest, 'test.csv')
 output_train_augmented = os.path.join(output_traintest, 'train_augmented.csv')
 
 
 # initialize output directories
-output_folders = [output_classifications, output_frames, output_windows, output_traintest]
+output_folders = [output_classifications, output_windows, output_traintest]
 for folder in output_folders:
     if (os.path.exists(folder)):
         shutil.rmtree(folder)
@@ -132,7 +131,7 @@ for root, dirs, files in os.walk(input_boxes):
 
 
 # video frame jsons -> frame csv
-print 'Converting video frame JSONs to frame CSV...'
+print 'Converting video frame JSONs to window CSVs...'
 for root, dirs, files in os.walk(input_boxes):
     for video in sorted(dirs):
         # video specific pathing
@@ -145,83 +144,36 @@ for root, dirs, files in os.walk(input_boxes):
         res_y = resolution[1]
         # open classifications csv file
         classifications = np.genfromtxt(classifications_csv, delimiter=',', dtype=int)
-        # do for each frame
-        for i, frame in enumerate(sorted(os.listdir(boxes_folder))):
-            # get the strongest detection for each category
-            frame_data = json.load(open(os.path.join(boxes_folder, frame), 'r'))
-            object_dict = {}
-            # do for each object
-            for detected_object in frame_data['body']['predictions'][0]['classes']:
-                category = detected_object['cat']
-                if category in object_dict:
-                    if object_dict[category]['prob'] < detected_object['prob']:
-                        object_dict[category] = detected_object
-                else:
-                    object_dict[category] = detected_object
-            # write classification as first line item
-            detections = [classifications[i]]
-            # take only excavator parts to the sequence processor
-            ordering = ['cabin', 'forearm', 'upperarm', 'wheelbase', 'attachment-bucket', 'attachment-breaker']
-            # write highest detections to array
-            for item in ordering:
-                if item in object_dict:
-                    # translate to new format
-                    obj = object_dict[item]
-                    C_X = ((obj['bbox']['xmax'] - obj['bbox']['xmin']) / 2 + obj['bbox']['xmin']) / res_x
-                    C_Y = ((obj['bbox']['ymin'] - obj['bbox']['ymax']) / 2 + obj['bbox']['ymax']) / res_y
-                    W = (obj['bbox']['xmax'] - obj['bbox']['xmin']) / res_x
-                    H = (obj['bbox']['ymin'] - obj['bbox']['ymax']) / res_y
-                    Conf = obj['prob']
-                    detections.extend([C_X, C_Y, W, H, Conf])
-                else:
-                    # when an excavator part is not detected
-                    detections.extend([0,0,0,0,0])
-            # write detections
-            with open(os.path.join(output_frames, video+'.csv'), 'a') as f:
-                writer = csv.writer(f)
-                writer.writerow(detections)
-
-
-# frame csvs -> window csvs
-print 'Converting frame CSVs to window CSVs...'
-for filename in sorted(os.listdir(output_frames)):
-    # open frames csv file and make sure it contains more than one frame
-    frames = np.genfromtxt(os.path.join(output_frames, filename), delimiter=',')
-    assert(frames.size > 31)
-    # open output file, i.e., the window csv
-    with open(os.path.join(output_windows, filename), 'wb') as f:
-        writer = csv.writer(f)
         # initialize window buffer
-        windowbuffer = []
+        json_batch = []
         classificationbuffer = []
         bufferlength = 0
-        # do for each frame, i.e., each line
-        for i in range(frames.shape[0]):
-            # if we find a 'unusable' classification, disregard whole window
-            if frames[i][0] == 2:
-                windowbuffer = []
-                classificationbuffer = []
-                bufferlength = 0
-                continue
-            # otherwise, add the frame to the window
-            bufferlength = bufferlength + 1
-            classificationbuffer.extend([frames[i][0]])
-            # do for each frame value except the classification
-            for j in range(1, frames[i][:].shape[0]):
-                # difference when not the first frame, otherwise, fill zeroes
-                if bufferlength == 1:
-                    windowbuffer.extend(np.append([frames[i][j]], [0]))
-                else:
-                    windowbuffer.extend(np.append([frames[i][j]], [frames[i][j] - frames[i-1][j]]))
-            # if the bufferlength equals window size
-            if bufferlength == args.window:
-                # write window to file
-                #print windowbuffer
-                writer.writerow(np.append(mode(classificationbuffer)[0],windowbuffer))
-                # clear the window buffer
-                windowbuffer = []
-                classificationbuffer = []
-                bufferlength = 0
+        # open output file, i.e., the window csv
+        with open(os.path.join(output_windows, video+'.csv'), 'wb') as f:
+            writer = csv.writer(f)
+            # do for each frame
+            for i, frame in enumerate(sorted(os.listdir(boxes_folder))):
+                # open json
+                frame_data = json.load(open(os.path.join(boxes_folder, frame), 'r'))
+                # if we find a 'unusable' classification, disregard whole window
+                if classifications[i] == 2:
+                    json_batch = []
+                    classificationbuffer = []
+                    bufferlength = 0
+                    continue
+                # otherwise, add the frame to the window
+                json_batch.extend([frame_data])
+                classificationbuffer.extend([classifications[i]])
+                bufferlength += 1
+                # if the bufferlength equals window size
+                if bufferlength == args.window:
+                    # write classification and corresponding window to file
+                    #print 'writing row for '+video
+                    writer.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch)))
+                    # clear the window buffer
+                    json_batch = []
+                    classificationbuffer = []
+                    bufferlength = 0
 
 
 # window csvs -> train/test split

@@ -44,9 +44,9 @@ assert(args.window % 2 != 0)
 warnings.filterwarnings('ignore')
 estimators = 500
 rootdir = os.getcwd()
-model_folder = os.path.join(rootdir, 'seqproc', '05_model')
+model_folder = os.path.join(rootdir, 'seqproc', '04_model')
 model_file = os.path.join(model_folder, 'model.pkl')
-traintest_folder = os.path.join(rootdir, 'seqproc', '04_traintest')
+traintest_folder = os.path.join(rootdir, 'seqproc', '03_traintest')
 testset = np.genfromtxt(os.path.join(traintest_folder, 'test.csv'), delimiter=',')
 if args.augment:
     trainset = np.genfromtxt(os.path.join(traintest_folder, 'train_augmented.csv'), delimiter=',')

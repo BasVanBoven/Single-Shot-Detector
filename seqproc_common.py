@@ -5,20 +5,16 @@
 
 
 # imports
-import os
-import sys
-import csv
-import json
-import itertools
-import numpy as np
+# no imports for now
 
 
 # returns a feature engineered window (in the form of a list) given the video resolution and a list of jsons
-def window (res_x, res_y, json_data):
+def window (res_x, res_y, json_batch):
     # convert json frame sequence to window
     window_undifferenced = []
+    number_of_features = 5
     # do for each frame
-    for frame in json_data:
+    for frame in json_batch:
         # get the strongest detection for each category
         object_dict = {}
         # do for each object
@@ -49,16 +45,16 @@ def window (res_x, res_y, json_data):
                 H = ymax - ymin
                 # extend window with features
                 features = [C_X, C_Y, W, H, conf]
-                number_of_features = len(features)
+                assert(number_of_features == len(features))
                 window_undifferenced.extend(features)
             else:
                 # when an excavator part is not detected, extend with padding
-                window_undifferenced.extend([0] * len(features))
+                window_undifferenced.extend([0] * number_of_features)
     # difference each list item
     window_differenced = []
     for i in range(0, len(window_undifferenced)):
         # difference when not the first frame, otherwise, fill zeroes
-        if i < len(features) * len(ordering):
+        if i < number_of_features * len(ordering):
             window_differenced.extend([window_undifferenced[i], 0])
         else:
             window_differenced.extend([window_undifferenced[i], window_undifferenced[i] - window_undifferenced[i-(len(features)* len(ordering))]])

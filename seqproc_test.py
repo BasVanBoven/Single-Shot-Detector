@@ -6,8 +6,6 @@
 
 # imports
 import os
-import csv
-import json
 import requests
 import json
 import argparse
@@ -29,7 +27,7 @@ firstframenumber = int(args.firstframe[-4:]) # only take last 8-5 characters fro
 server_url = 'http://127.0.0.1:5000/detect_movement/'
 json_folder = os.path.join(rootdir, 'video', 'output', 'json', video)
 resolution_csv = os.path.join(rootdir, 'video', 'output', 'resolution', video+'.csv')
-model_log = os.path.join(rootdir,'seqproc', '05_model', 'model.log')
+model_log = os.path.join(rootdir,'seqproc', '04_model', 'model.log')
 
 
 # initialize window size, needs to be uneven to make the majority vote function correctly
