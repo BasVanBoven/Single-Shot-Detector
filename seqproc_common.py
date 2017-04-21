@@ -12,9 +12,12 @@
 def window (res_x, res_y, json_batch):
     # convert json frame sequence to window
     window_undifferenced = []
+    window_size = 0
     number_of_features = 5
     # do for each frame
     for frame in json_batch:
+        # up the window size
+        window_size += 1
         # get the strongest detection for each category
         object_dict = {}
         # do for each object
@@ -39,6 +42,7 @@ def window (res_x, res_y, json_batch):
                 ymax = obj['bbox']['ymin'] / res_y
                 conf = obj['prob']
                 # define features
+                # also update number_of_features to avoid assertion fail
                 C_X = (xmax - xmin)/2 + xmin
                 C_Y = (ymax - ymin)/2 + ymin
                 W = xmax - xmin
@@ -58,5 +62,7 @@ def window (res_x, res_y, json_batch):
             window_differenced.extend([window_undifferenced[i], 0])
         else:
             window_differenced.extend([window_undifferenced[i], window_undifferenced[i] - window_undifferenced[i-(len(features)* len(ordering))]])
+    # check the constructed window has the correct length
+    assert(len(window_differenced) == number_of_features * 2 * len(ordering) * window_size)
     # return the constructed window
     return window_differenced

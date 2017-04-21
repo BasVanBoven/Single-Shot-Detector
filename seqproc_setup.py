@@ -32,6 +32,7 @@ parser.add_argument('-w', '--window', type=int, default=5, help='window size to 
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
 parser.add_argument('-t', '--test', type=float, default=0.2, help='percentage of videos in test set')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
+parser.add_argument('-n', '--noserv', default=False, action='store_true', help='do not start serving after training')
 args = parser.parse_args()
 # window size needs to be uneven to make the majority vote function correctly
 assert(args.window % 2 != 0)
@@ -254,6 +255,8 @@ if args.stop == False:
     cmd += str(args.crossval)
     if args.augment == True:
         cmd += ' -a'
+    if args.noserv == True:
+        cmd += ' -n'
     if args.debug == True:
         cmd += ' -d'
     os.system(cmd)

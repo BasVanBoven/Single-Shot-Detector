@@ -35,6 +35,7 @@ parser.add_argument('-r', '--random', default=False, action='store_true', help='
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
+parser.add_argument('-n', '--noserv', default=False, action='store_true', help='do not start serving after training')
 args = parser.parse_args()
 # window size needs to be uneven to make the majority vote function correctly
 assert(args.window % 2 != 0)
@@ -131,10 +132,10 @@ with open(os.path.join(model_folder, 'model.log'), 'wb') as f:
 # train and test a model
 print 'Model training started...'
 #classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
-#classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(MLPClassifier(max_iter=2000), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(SVC(), X_train, y_train, X_test, y_test)
-classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+#classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
 y_pred = classifier.predict(X_test)
 # print confusion matrix
 cnf_matrix = confusion_matrix(y_test, y_pred)
@@ -142,3 +143,10 @@ np.set_printoptions(precision=2)
 print_confusion_matrix(cnf_matrix, classes=['No dig', 'Dig'])
 # save model to disk
 pickle.dump(classifier, open(model_file, 'wb'), protocol=2)
+
+
+# start serving, old server should have stopped automatically due to changed files
+if args.noserv == False:
+    cmd = 'nohup python '+rootdir+'/seqproc_serv.py &'
+    print 'Started serving the trained model in the background...'    
+    os.system(cmd)
