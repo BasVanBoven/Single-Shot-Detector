@@ -30,13 +30,10 @@ def window (res_x, res_y, json_batch):
                     object_dict[category] = detected_object
             else:
                 object_dict[category] = detected_object
-
         # write feature engineered window to array
         for itemno, item in enumerate(objects):
             if item in object_dict:
                 # fetch json output and translate to relative positions
-                # be careful: ymin and ymax are switched around by DeepDetect
-                # code below is always correct, bug or not
                 obj = object_dict[item]
                 xmin = min(obj['bbox']['xmin'], obj['bbox']['xmax']) / res_x
                 xmax = max(obj['bbox']['xmin'], obj['bbox']['xmax']) / res_x
@@ -55,7 +52,7 @@ def window (res_x, res_y, json_batch):
             W = xmax - xmin
             H = ymax - ymin
             features = [C_X, C_Y, W, H, conf]
-            # write features to array
+            # update feature array
             features_base[frameno][itemno][:] = features
 
 
