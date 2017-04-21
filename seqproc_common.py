@@ -1,8 +1,6 @@
 #!/usr/bin/python
 # seqproc_common.py - contains helper functions for the Sequence Processor
 
-# prerequisites: sudo pip install sklearn
-
 
 # imports
 import numpy as np
