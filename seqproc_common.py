@@ -13,7 +13,6 @@ def window (res_x, res_y, json_batch):
     # convert json frame sequence to window
     window_undifferenced = []
     window_size = 0
-    number_of_features = 5
     # do for each frame
     for frame in json_batch:
         # up the window size
@@ -35,34 +34,36 @@ def window (res_x, res_y, json_batch):
             if item in object_dict:
                 # fetch json output and translate to relative positions
                 # be careful: ymin and ymax are switched around by DeepDetect
+                # code below is always correct, bug or not
                 obj = object_dict[item]
-                xmin = obj['bbox']['xmin'] / res_x
-                xmax = obj['bbox']['xmax'] / res_x
-                ymin = obj['bbox']['ymax'] / res_y
-                ymax = obj['bbox']['ymin'] / res_y
+                xmin = min(obj['bbox']['xmin'], obj['bbox']['xmax']) / res_x
+                xmax = max(obj['bbox']['xmin'], obj['bbox']['xmax']) / res_x
+                ymin = min(obj['bbox']['ymin'], obj['bbox']['ymax']) / res_y
+                ymax = max(obj['bbox']['ymin'], obj['bbox']['ymax']) / res_y
                 conf = obj['prob']
-                # define features
-                # also update number_of_features to avoid assertion fail
-                C_X = (xmax - xmin)/2 + xmin
-                C_Y = (ymax - ymin)/2 + ymin
-                W = xmax - xmin
-                H = ymax - ymin
-                # extend window with features
-                features = [C_X, C_Y, W, H, conf]
-                assert(number_of_features == len(features))
-                window_undifferenced.extend(features)
             else:
-                # when an excavator part is not detected, extend with padding
-                window_undifferenced.extend([0] * number_of_features)
+                xmin = 0
+                xmax = 0
+                ymin = 0
+                ymax = 0
+                conf = 0
+            # define features
+            C_X = (xmax - xmin)/2 + xmin
+            C_Y = (ymax - ymin)/2 + ymin
+            W = xmax - xmin
+            H = ymax - ymin
+            features = [C_X, C_Y, W, H, conf]
+            # extend window with features
+            window_undifferenced.extend(features)
     # difference each list item
     window_differenced = []
     for i in range(0, len(window_undifferenced)):
         # difference when not the first frame, otherwise, fill zeroes
-        if i < number_of_features * len(ordering):
+        if i < len(features) * len(ordering):
             window_differenced.extend([window_undifferenced[i], 0])
         else:
             window_differenced.extend([window_undifferenced[i], window_undifferenced[i] - window_undifferenced[i-(len(features)* len(ordering))]])
     # check the constructed window has the correct length
-    assert(len(window_differenced) == number_of_features * 2 * len(ordering) * window_size)
+    assert(len(window_differenced) == len(features) * 2 * len(ordering) * window_size)
     # return the constructed window
     return window_differenced
