@@ -5,21 +5,26 @@
 
 
 # imports
-# no imports for now
+import numpy as np
 
 
 # returns a feature engineered window (in the form of a list) given the video resolution and a list of jsons
 def window (res_x, res_y, json_batch):
-    # convert json frame sequence to window
-    window_undifferenced = []
-    window_size = 0
+
+
+    # variables
+    objects = ['cabin', 'forearm', 'upperarm', 'wheelbase', 'attachment-bucket', 'attachment-breaker']
+    num_frames = len(json_batch)
+    num_objects = len(objects)
+    num_base_features = 5
+
+
+    # construct base features from json-data
+    features_base = np.zeros((num_frames, num_objects, num_base_features))
     # do for each frame
-    for frame in json_batch:
-        # up the window size
-        window_size += 1
+    for frameno, frame in enumerate(json_batch):
         # get the strongest detection for each category
         object_dict = {}
-        # do for each object
         for detected_object in frame['body']['predictions'][0]['classes']:
             category = detected_object['cat']
             if category in object_dict:
@@ -27,10 +32,9 @@ def window (res_x, res_y, json_batch):
                     object_dict[category] = detected_object
             else:
                 object_dict[category] = detected_object
-        # present only excavator parts to the sequence processor
-        ordering = ['cabin', 'forearm', 'upperarm', 'wheelbase', 'attachment-bucket', 'attachment-breaker']
+
         # write feature engineered window to array
-        for item in ordering:
+        for itemno, item in enumerate(objects):
             if item in object_dict:
                 # fetch json output and translate to relative positions
                 # be careful: ymin and ymax are switched around by DeepDetect
@@ -53,17 +57,29 @@ def window (res_x, res_y, json_batch):
             W = xmax - xmin
             H = ymax - ymin
             features = [C_X, C_Y, W, H, conf]
-            # extend window with features
-            window_undifferenced.extend(features)
-    # difference each list item
-    window_differenced = []
-    for i in range(0, len(window_undifferenced)):
-        # difference when not the first frame, otherwise, fill zeroes
-        if i < len(features) * len(ordering):
-            window_differenced.extend([window_undifferenced[i], 0])
-        else:
-            window_differenced.extend([window_undifferenced[i], window_undifferenced[i] - window_undifferenced[i-(len(features)* len(ordering))]])
-    # check the constructed window has the correct length
-    assert(len(window_differenced) == len(features) * 2 * len(ordering) * window_size)
-    # return the constructed window
-    return window_differenced
+            # write features to array
+            features_base[frameno][itemno][:] = features
+
+
+    # construct difference features from base features
+    features_base_diff = np.zeros((num_frames-1, num_objects, num_base_features))
+    for frameno in range(num_frames-1):
+        for itemno in range(num_objects):
+            for featureno in range(num_base_features):
+                # calculate based on previous existing object, to skip detection disappearances
+                prev_existing_object = -1
+                for i in range(frameno, -1, -1):
+                    if features_base[i][itemno][4] != 0:
+                        prev_existing_object = i
+                # only calculate difference if object exists and we can find an existing predecessor (conf > 0)
+                if (features_base[frameno+1][itemno][4] != 0 and prev_existing_object != -1):
+                    features_base_diff[frameno][itemno][featureno] = features_base[frameno+1][itemno][featureno] - features_base[frameno][itemno][featureno]
+
+
+    # collect all engineered features
+    output = features_base.flatten().tolist() + features_base_diff.flatten().tolist()
+    # check that all values are normalized correctly
+    assert(all(i >= -1 for i in output))
+    assert(all(i <= 1 for i in output))
+    # return window
+    return output
