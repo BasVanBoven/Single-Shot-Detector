@@ -15,6 +15,7 @@ import random
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
+import seqproc_common as sp
 from random import shuffle
 from pprint import pprint
 from scipy.stats import mode
@@ -22,6 +23,8 @@ from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report,confusion_matrix,fbeta_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.svm import SVC
 
 
 # handle input arguments
@@ -128,8 +131,10 @@ with open(os.path.join(model_folder, 'model.log'), 'wb') as f:
 # train and test a model
 print 'Model training started...'
 #classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
-classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
-#classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+#classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+#classifier, score = train_test(MLPClassifier(max_iter=2000), X_train, y_train, X_test, y_test)
+#classifier, score = train_test(SVC(), X_train, y_train, X_test, y_test)
+classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
 y_pred = classifier.predict(X_test)
 # print confusion matrix
 cnf_matrix = confusion_matrix(y_test, y_pred)

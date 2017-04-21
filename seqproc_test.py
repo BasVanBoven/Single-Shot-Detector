@@ -12,6 +12,7 @@ import requests
 import json
 import argparse
 import numpy as np
+import seqproc_common as sp
 
 
 # handle input arguments

@@ -17,6 +17,7 @@ import shutil
 import random
 import numpy as np
 import matplotlib.pyplot as plt
+import seqproc_common as sp
 from random import shuffle
 from pprint import pprint
 from scipy.stats import mode

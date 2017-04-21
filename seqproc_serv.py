@@ -10,6 +10,7 @@ import sys
 import json
 import pickle
 import numpy as np
+import seqproc_common as sp
 from flask_api import FlaskAPI, status, exceptions
 from flask import request, url_for, jsonify
 
@@ -58,51 +59,11 @@ def detect_movement():
         res_y = json_data['res']['Y']
         json_data = json_data['seq']
 
-        # convert json frame sequence to window
-        window_undifferenced = []
-        # do for each frame
-        for frame in json_data:
-            # get the strongest detection for each category
-            object_dict = {}
-            # do for each object
-            for detected_object in frame['body']['predictions'][0]['classes']:
-                category = detected_object['cat']
-                if category in object_dict:
-                    if object_dict[category]['prob'] < detected_object['prob']:
-                        object_dict[category] = detected_object
-                else:
-                    object_dict[category] = detected_object
-            # take only excavator parts to the sequence processor
-            ordering = ['cabin', 'forearm', 'upperarm', 'wheelbase', 'attachment-bucket', 'attachment-breaker']
-            # write highest detections to array
-            for item in ordering:
-                if item in object_dict:
-                    # translate to new format
-                    obj = object_dict[item]
-                    C_X = ((obj['bbox']['xmax'] - obj['bbox']['xmin']) / 2 + obj['bbox']['xmin']) / res_x
-                    C_Y = ((obj['bbox']['ymin'] - obj['bbox']['ymax']) / 2 + obj['bbox']['ymax']) / res_y
-                    W = (obj['bbox']['xmax'] - obj['bbox']['xmin']) / res_x
-                    H = (obj['bbox']['ymin'] - obj['bbox']['ymax']) / res_y
-                    Conf = obj['prob']
-                    window_undifferenced.extend([C_X, C_Y, W, H, Conf])
-                else:
-                    # when an excavator part is not detected
-                    window_undifferenced.extend([0,0,0,0,0])
-        # make sure the list length is correct
-        assert(len(window_undifferenced) == windowsize * 30)
-        # difference each list item
-        window_differenced = []
-        for i in range(0, len(window_undifferenced)):
-            # difference when not the first frame, otherwise, fill zeroes
-            if i < 30:
-                window_differenced.extend([window_undifferenced[i], 0])
-            else:
-                window_differenced.extend([window_undifferenced[i], window_undifferenced[i] - window_undifferenced[i-30]])
-        # make sure the list length is still correct
-        assert(len(window_differenced) == windowsize * 60)
+        # build window
+        window = sp.window(res_x, res_y, json_data)
 
         # predict and return result
-        movement = bool(classifier.predict(window_differenced))
+        movement = bool(classifier.predict(window))
         return jsonify({'movement': movement, 'err': ''}), 200
 
 
@@ -113,4 +74,7 @@ def detect_movement():
 
 # run server
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(
+        debug=True,
+        port=5000
+    )
