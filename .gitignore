@@ -11,3 +11,4 @@ frames.zip
 dd_client.pyc
 seqproc_common.pyc
 seqproc_old/*
+nohup.out
