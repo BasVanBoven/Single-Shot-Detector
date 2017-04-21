@@ -71,8 +71,17 @@ def window (res_x, res_y, json_batch):
                     features_base_diff[frameno][itemno][featureno] = features_base[frameno+1][itemno][featureno] - features_base[frameno][itemno][featureno]
 
 
+    # for each object, calculate a motility score over whole window
+    motility = np.zeros((num_objects))
+    for itemno in range(num_objects):
+        for frameno in range(num_frames-1):
+            motility[itemno] += features_base_diff[frameno][itemno][0]
+            motility[itemno] += features_base_diff[frameno][itemno][1]
+        motility[itemno] /= 2*(num_frames-1)
+
+
     # collect all engineered features
-    output = features_base.flatten().tolist() + features_base_diff.flatten().tolist()
+    output = features_base.flatten().tolist() + features_base_diff.flatten().tolist() + motility.flatten().tolist()
     # check that all values are normalized correctly
     assert(all(i >= -1 for i in output))
     assert(all(i <= 1 for i in output))

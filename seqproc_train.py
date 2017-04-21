@@ -13,6 +13,8 @@ import argparse
 import shutil
 import random
 import warnings
+import subprocess
+import signal
 import numpy as np
 import matplotlib.pyplot as plt
 import seqproc_common as sp
@@ -147,6 +149,14 @@ pickle.dump(classifier, open(model_file, 'wb'), protocol=2)
 
 # start serving, old server should have stopped automatically due to changed files
 if args.noserv == False:
+    # kill existing server, if running (does not work yet)
+    p = subprocess.Popen(['ps', '-A'], stdout=subprocess.PIPE)
+    out, err = p.communicate()
+    for line in out.splitlines():
+        if 'seqproc_serv' in line:
+            pid = int(line.split(None, 1)[0])
+            os.kill(pid, signal.SIGKILL)
+    # start new server
     cmd = 'nohup python '+rootdir+'/seqproc_serv.py &'
-    print 'Started serving the trained model in the background...'    
+    print 'Started serving the trained model in the background...'
     os.system(cmd)
