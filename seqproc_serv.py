@@ -58,7 +58,7 @@ def detect_movement():
         json_data = json_data['seq']
 
         # build window
-        window = sp.window(res_x, res_y, json_data)
+        window = sp.window(res_x, res_y, json_data, False)
 
         # predict and return result
         movement = bool(classifier.predict(window))

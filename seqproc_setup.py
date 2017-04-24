@@ -59,45 +59,6 @@ for folder in output_folders:
     os.makedirs(folder, 0755)
 
 
-# helper functions for augmentation steps
-def is_Cx(i):
-    if i % 10 == 1:
-        return True
-    return False
-def is_delta_Cx(i):
-    if i % 10 == 2:
-        return True
-    return False
-def is_Cy(i):
-    if i % 10 == 3:
-        return True
-    return False
-def is_not_pred_conf(i):
-    if 1 <= i <= 8:
-        return True
-    return False
-def find_window_limits(row):
-    xmin = 1
-    ymin = 1
-    xmax = 0
-    ymax = 0
-    for i in range(row.shape[0]):
-        if is_Cx(i) and row[i+8] > 0:
-            xmax = max(xmax,row[i]+0.5*row[i+4])
-            xmin = min(xmin,row[i]-0.5*row[i+4])
-        if is_Cy(i) and row[i+6] > 0:
-            ymax = max(ymax,row[i]+0.5*row[i+4])
-            ymin = min(ymin,row[i]-0.5*row[i+4])
-    return xmin, xmax, ymin, ymax
-def move_boxes(row, shift_w, shift_h):
-    for i in range(row.shape[0]):
-        if is_Cx(i) and row[i+8] > 0:
-            row[i] = row[i] + shift_w
-        if is_Cy(i) and row[i+6] > 0:
-            row[i] = row[i] + shift_h
-    return row
-
-
 # tags -> classification
 print 'Converting tags CSV to classification CSV...'
 for root, dirs, files in os.walk(input_boxes):
@@ -168,9 +129,14 @@ for root, dirs, files in os.walk(input_boxes):
                 bufferlength += 1
                 # if the bufferlength equals window size
                 if bufferlength == args.window:
-                    # write classification and corresponding window to file
-                    #print 'writing row for '+video
-                    writer.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch)))
+                        if args.augment:
+                            # build different permutations
+                            for i in range(args.permutations):
+                                # write classification and corresponding window to file
+                                writer.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch, True)))
+                        else:
+                            # write classification and corresponding window to file
+                            writer.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch, False)))
                     # clear the window buffer
                     json_batch = []
                     classificationbuffer = []
@@ -201,48 +167,6 @@ with open(output_test, 'wb') as f:
 with open(os.path.join(output_traintest, 'test_list.csv'), 'wb') as f:
     writer = csv.writer(f)
     writer.writerow(test_list)
-
-
-# train/test split -> augmented train/test split
-if args.augment:
-    print 'Augmenting train split...'
-    # open train split
-    original = np.genfromtxt(output_train, delimiter=',')
-    # debug: limits to 100 samples, remove this in the end
-    #original = original[0:100,:]
-    # open output file
-    with open(output_train_augmented, 'wb') as f:
-        writer = csv.writer(f)
-        # do for each window
-        for row in original:
-            # generate a given number of permutations
-            for perm in range(args.permutations):
-                # horizontal flip (50% chance)
-                if random.random() < .5:
-                    for i in range(row.shape[0]):
-                        if is_Cx(i):
-                            row[i] = 1 - row[i]
-                        if is_delta_Cx(i):
-                            row[i] = row[i] * -1
-                # place objects in top left corner
-                xmin, xmax, ymin, ymax = find_window_limits(row)
-                row = move_boxes(row, -xmin, -ymin)
-                # resize objects
-                # 1.3 and 0.7 are arbitrary min/max thresholds
-                xmin, xmax, ymin, ymax = find_window_limits(row)
-                maxscale = min(1/xmax, 1/ymax, 1.3)
-                minscale = 0.7
-                scale = random.uniform(minscale, maxscale)
-                for i in range(row.shape[0]):
-                    if is_not_pred_conf(i):
-                        row[i] = row[i] * scale
-                # move objects
-                xmin, xmax, ymin, ymax = find_window_limits(row)
-                shift_w = random.uniform(0, 1-xmax)
-                shift_h = random.uniform(0, 1-ymax)
-                row = move_boxes(row, shift_w, shift_h)
-                # write line to csv
-                writer.writerow(row)
 
 
 # start training
