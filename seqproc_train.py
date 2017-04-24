@@ -35,6 +35,7 @@ parser.add_argument('-d', '--debug', default=False, action='store_true', help='p
 parser.add_argument('-b', '--balance', default=True, action='store_true', help='balance training set')
 parser.add_argument('-r', '--random', default=False, action='store_true', help='perform random classification')
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
+parser.add_argument('-f', '--beta', type=int, default=1, help='beta score to be reported')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
 parser.add_argument('-n', '--noserv', default=False, action='store_true', help='do not start serving after training')
@@ -63,10 +64,10 @@ if (os.path.exists(model_folder)):
 os.makedirs(model_folder, 0755)
 
 
-# calculates f2 score
-def f2scorer(estimator, X, y):
+# calculates f-score
+def fscorer(estimator, X, y):
     y_pred = estimator.predict(X)
-    score = fbeta_score(y, y_pred, beta=2)
+    score = fbeta_score(y, y_pred, beta=args.beta)
     return score
 
 
@@ -74,12 +75,12 @@ def f2scorer(estimator, X, y):
 def train_test(chosen_model, X_train, y_train, X_test, y_test):
     classifier = chosen_model.fit(X_train, y_train)
     scores = cross_val_score(classifier, X_train, y_train, cv=args.crossval)
-    print('Crossval F2: %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
+    print('Crossval F'+str(args.beta)+': %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
     # accuracy scoring on test set
     y_pred = classifier.predict(X_test)
-    score = fbeta_score(y_test, y_pred, beta=2)
+    score = fbeta_score(y_test, y_pred, beta=args.beta)
     model_name = str(type(chosen_model).__name__)
-    print(model_name + ' F2 score: ' + str(score))
+    print(model_name + ' F'+str(args.beta)+' score: ' + str(score))
     return classifier, score
 
 

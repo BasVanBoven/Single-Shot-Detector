@@ -148,8 +148,7 @@ def window (res_x, res_y, json_batch, augment):
             cabindistance[frameno][itemno] = math.hypot(x2-x1,y2-y1) / 2
 
     # collect all engineered features
-    #output = features_base.flatten().tolist() + features_base_diff.flatten().tolist() + motility.flatten().tolist() + cabindistance.flatten().tolist()
-    output = features_base.flatten().tolist()
+    output = features_base.flatten().tolist() + features_base_diff.flatten().tolist() + motility.flatten().tolist() + cabindistance.flatten().tolist()
     # check that all values are normalized correctly
     assert(all(i >= -1 for i in output))
     assert(all(i <= 1 for i in output))
