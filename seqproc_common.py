@@ -24,12 +24,8 @@ def find_window_limits(features_base):
                 xmin = min(xmin,features_base[frameno][itemno][0]-0.5*features_base[frameno][itemno][2])
                 ymax = max(ymax,features_base[frameno][itemno][1]+0.5*features_base[frameno][itemno][3])
                 ymin = min(ymin,features_base[frameno][itemno][1]-0.5*features_base[frameno][itemno][3])
-                # fix for imprecision of floats
-                #xmin = max(xmin, 0)
-                #xmax = min(xmax, 1)
-                #ymin = max(ymin, 0)
-                #ymax = min(ymax, 1)
     return xmin, xmax, ymin, ymax
+
 
 # augmentation helper: move all boxes with a pre-defined shift
 def move_boxes(features_base, shift_w, shift_h):
@@ -94,10 +90,12 @@ def window (res_x, res_y, json_batch, augment):
     # if we want to augment, generate a random permutation now
     if augment:
         # horizontal flip (50% chance)
-        #if random.random() < .5:
-        #    for frameno, frame in enumerate(json_batch):
-        #        for itemno, item in enumerate(objects):
-        #            features_base[frameno][itemno][0] = 1 - features_base[frameno][itemno][0]
+        if random.random() < .5:
+            for frameno in range(num_frames):
+                for itemno in range(num_objects):
+                    if (features_base[frameno][itemno][4] != 0):
+                        # only flip if object exists (conf > 0)
+                        features_base[frameno][itemno][0] = 1 - features_base[frameno][itemno][0]
         # place objects in top left corner
         xmin, xmax, ymin, ymax = find_window_limits(features_base)
         move_boxes(features_base, -xmin, -ymin)
@@ -107,8 +105,8 @@ def window (res_x, res_y, json_batch, augment):
         maxscale = min(1/xmax, 1/ymax, 1.3)
         minscale = 0.7
         scale = random.uniform(minscale, maxscale)
-        for frameno, frame in enumerate(json_batch):
-            for itemno, item in enumerate(objects):
+        for frameno in range(num_frames):
+            for itemno in range(num_objects):
                 for featureno in range(num_base_features-1):
                     features_base[frameno][itemno][featureno] = features_base[frameno][itemno][featureno] * scale
         # move objects
@@ -153,10 +151,8 @@ def window (res_x, res_y, json_batch, augment):
     #output = features_base.flatten().tolist() + features_base_diff.flatten().tolist() + motility.flatten().tolist() + cabindistance.flatten().tolist()
     output = features_base.flatten().tolist()
     # check that all values are normalized correctly
-    if(all(i >= -1 for i in output) == False):
-        print output
-    if(all(i <= 1 for i in output) == False):
-        print output
+    assert(all(i >= -1 for i in output))
+    assert(all(i <= 1 for i in output))
 
     # return window
     return output
