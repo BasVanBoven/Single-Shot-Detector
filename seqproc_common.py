@@ -4,8 +4,8 @@
 
 # imports
 import math
+import random
 import numpy as np
-from random import shuffle
 
 
 # augmentation helper: find the bounding box of the region of interest
@@ -15,8 +15,8 @@ def find_window_limits(features_base):
     xmax = 0
     ymax = 0
     # do for all items in all frames
-    for frameno, frame in enumerate(json_batch):
-        for itemno, item in enumerate(objects):
+    for frameno in range(features_base.shape[0]):
+        for itemno in range(features_base.shape[1]):
             # only continue if confidence is higher than 0, i.e., object is detected
             if features_base[frameno][itemno][4] > 0:
                 # update region of interest if coordinate exceeds limits
@@ -30,8 +30,8 @@ def find_window_limits(features_base):
 # augmentation helper: move all boxes with a pre-defined shift
 def move_boxes(features_base, shift_w, shift_h):
     # do for all items in all frames
-    for frameno, frame in enumerate(json_batch):
-        for itemno, item in enumerate(objects):
+    for frameno in range(features_base.shape[0]):
+        for itemno in range(features_base.shape[1]):
             # only continue if confidence is higher than 0, i.e., object is detected
             if features_base[frameno][itemno][4] > 0:
                 # shift C_X and C_Y
@@ -105,7 +105,7 @@ def window (res_x, res_y, json_batch, augment):
         scale = random.uniform(minscale, maxscale)
         for frameno, frame in enumerate(json_batch):
             for itemno, item in enumerate(objects):
-                for featureno in range(num_base_features-1)
+                for featureno in range(num_base_features-1):
                     features_base[frameno][itemno][featureno] = features_base[frameno][itemno][featureno] * scale
         # move objects
         xmin, xmax, ymin, ymax = find_window_limits(features_base)
@@ -148,7 +148,7 @@ def window (res_x, res_y, json_batch, augment):
     # collect all engineered features
     output = features_base.flatten().tolist() + features_base_diff.flatten().tolist() + motility.flatten().tolist() + cabindistance.flatten().tolist()
     # check that all values are normalized correctly
-    assert(all(i >= -1 for i in output))
-    assert(all(i <= 1 for i in output))
+    #assert(all(i >= -1 for i in output))
+    #assert(all(i <= 1 for i in output))
     # return window
     return output

@@ -44,15 +44,16 @@ input_boxes = os.path.join(rootdir, 'video', 'output', 'json')
 input_tags = os.path.join(rootdir, 'video', 'output', 'tags')
 input_resolution = os.path.join(rootdir, 'video', 'output', 'resolution')
 output_classifications = os.path.join(rootdir, 'seqproc', '01_classifications')
-output_windows = os.path.join(rootdir, 'seqproc', '02_windows')
+output_windows_clean = os.path.join(rootdir, 'seqproc', '02_windows', 'clean')
+output_windows_augmented = os.path.join(rootdir, 'seqproc', '02_windows', 'augmented')
 output_traintest = os.path.join(rootdir, 'seqproc', '03_traintest')
 output_train = os.path.join(output_traintest, 'train.csv')
-output_test = os.path.join(output_traintest, 'test.csv')
 output_train_augmented = os.path.join(output_traintest, 'train_augmented.csv')
+output_test = os.path.join(output_traintest, 'test.csv')
 
 
 # initialize output directories
-output_folders = [output_classifications, output_windows, output_traintest]
+output_folders = [output_classifications, output_windows_clean, output_windows_augmented, output_traintest]
 for folder in output_folders:
     if (os.path.exists(folder)):
         shutil.rmtree(folder)
@@ -111,8 +112,10 @@ for root, dirs, files in os.walk(input_boxes):
         classificationbuffer = []
         bufferlength = 0
         # open output file, i.e., the window csv
-        with open(os.path.join(output_windows, video+'.csv'), 'wb') as f:
-            writer = csv.writer(f)
+        with open(os.path.join(output_windows_clean, video+'.csv'), 'wb') as c, open(os.path.join(output_windows_augmented, video+'.csv'), 'wb') as a:
+            # define output writers
+            clean = csv.writer(c)
+            augmented = csv.writer(a)
             # do for each frame
             for i, frame in enumerate(sorted(os.listdir(boxes_folder))):
                 # open json
@@ -129,14 +132,14 @@ for root, dirs, files in os.walk(input_boxes):
                 bufferlength += 1
                 # if the bufferlength equals window size
                 if bufferlength == args.window:
-                        if args.augment:
-                            # build different permutations
-                            for i in range(args.permutations):
-                                # write classification and corresponding window to file
-                                writer.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch, True)))
-                        else:
+                    # write classification and corresponding window to file
+                    clean.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch, False)))
+                    # also build permutations if desired
+                    if args.augment:
+                        # build different permutations
+                        for i in range(args.permutations):
                             # write classification and corresponding window to file
-                            writer.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch, False)))
+                            augmented.writerow(np.append(mode(classificationbuffer)[0],sp.window(res_x, res_y, json_batch, True)))
                     # clear the window buffer
                     json_batch = []
                     classificationbuffer = []
@@ -146,23 +149,30 @@ for root, dirs, files in os.walk(input_boxes):
 # window csvs -> train/test split
 print 'Converting window CSVs to train/test split...'
 # determine the number of test videos
-number_train_vids = int(len(os.listdir(output_windows)) * (1-args.test))
-vids_list = os.listdir(output_windows)
+number_train_vids = int(len(os.listdir(output_windows_clean)) * (1-args.test))
+vids_list = os.listdir(output_windows_clean)
 random.shuffle(vids_list)
 train_list = vids_list[0:number_train_vids]
 test_list = vids_list[number_train_vids:]
 # write train output file
 with open(output_train, 'wb') as f:
     for filename in train_list:
-        with open(os.path.join(output_windows, filename)) as infile:
+        with open(os.path.join(output_windows_clean, filename)) as infile:
             for line in infile:
                 f.write(line)
 # write test output file
 with open(output_test, 'wb') as f:
     for filename in test_list:
-        with open(os.path.join(output_windows, filename)) as infile:
+        with open(os.path.join(output_windows_clean, filename)) as infile:
             for line in infile:
                 f.write(line)
+# write train_augmented output file, if necessary
+if args.augment:
+    with open(output_train_augmented, 'wb') as f:
+        for filename in train_list:
+            with open(os.path.join(output_windows_augmented, filename)) as infile:
+                for line in infile:
+                    f.write(line)
 # write test list to csv
 with open(os.path.join(output_traintest, 'test_list.csv'), 'wb') as f:
     writer = csv.writer(f)
