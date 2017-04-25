@@ -24,7 +24,7 @@ from scipy.stats import mode
 from sklearn.model_selection import train_test_split,cross_val_score
 from sklearn.metrics import classification_report,confusion_matrix,fbeta_score
 from sklearn.naive_bayes import GaussianNB
-from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier
+from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,ExtraTreesClassifier
 from sklearn.neural_network import MLPClassifier
 from sklearn.svm import SVC
 
@@ -81,6 +81,15 @@ def train_test(chosen_model, X_train, y_train, X_test, y_test):
     score = fbeta_score(y_test, y_pred, beta=args.beta)
     model_name = str(type(chosen_model).__name__)
     print(model_name + ' F'+str(args.beta)+' score: ' + str(score))
+    # print feature importances
+    if (args.debug):
+        importances = chosen_model.feature_importances_
+        std = np.std([tree.feature_importances_ for tree in chosen_model.estimators_],axis=0)
+        indices = np.argsort(importances)[::-1]
+        print("Feature ranking:")
+        for f in range(X_train.shape[1]):
+            print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+    # return result
     return classifier, score
 
 
@@ -135,11 +144,14 @@ with open(os.path.join(model_folder, 'model.log'), 'wb') as f:
 # train and test a model
 print 'Model training started...'
 #classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
-classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+#classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+classifier, score = train_test(ExtraTreesClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(MLPClassifier(max_iter=2000), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(SVC(), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
 y_pred = classifier.predict(X_test)
+
+
 # print confusion matrix
 cnf_matrix = confusion_matrix(y_test, y_pred)
 np.set_printoptions(precision=2)

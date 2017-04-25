@@ -30,7 +30,7 @@ from PIL import Image
 
 # handle input arguments
 parser = argparse.ArgumentParser(description='Process input data for training a Single Shot Detector.')
-parser.add_argument('-l', '--large', default=False, action='store_true', help='use the SSD512 architecture')
+parser.add_argument('-l', '--large', default=True, action='store_true', help='use the SSD512 architecture')
 parser.add_argument('-m', '--maxframes', type=int, default=50, help='maximum number of frames per video to process')
 parser.add_argument('-t', '--test', type=float, default=0.1, help='percentage of images in test set')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')

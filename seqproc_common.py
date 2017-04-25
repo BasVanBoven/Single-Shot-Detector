@@ -137,18 +137,89 @@ def window (res_x, res_y, json_batch, augment):
             motility[itemno] += features_base_diff[frameno][itemno][1]
         motility[itemno] /= 2*(num_frames-1)
 
-    # for each object in each frame, calculate the pythagorean distance to the cabin
-    cabindistance = np.zeros((num_frames, num_objects-1))
+    # relative motility of arm boxes vs cabin boxes
+    relative_motility = (motility[1] + motility[2] - motility[0] - motility[3]) / 2
+
+    # for each object in each frame, calculate the pythagorean, x and y distance to the cabin
+    cabindistance = np.zeros((num_frames, num_objects-1, 3))
     for frameno in range(num_frames-1):
         for itemno in range(num_objects-1):
             x1 = features_base[frameno][0][0]
-            x2 = features_base[frameno][itemno+1][0]
             y1 = features_base[frameno][0][1]
+            x2 = features_base[frameno][itemno+1][0]
             y2 = features_base[frameno][itemno+1][1]
-            cabindistance[frameno][itemno] = math.hypot(x2-x1,y2-y1) / 2
+            cabindistance[frameno][itemno][0] = math.hypot(x2-x1,y2-y1) / 2
+            cabindistance[frameno][itemno][1] = x2-x1
+            cabindistance[frameno][itemno][2] = y2-y1
+
+    # indicators of breaker / bucket window
+    # [0] = normalized cumulative confidence difference between breaker and bucket
+    # [1] = normalized cumulative forearm distance between breaker and bucket
+    # [2] = normalized cumulative forearm x-distance between breaker and bucket
+    # [3] = normalized cumulative forearm y-distance between breaker and bucket
+    breaker_vs_bucket = np.zeros((4))
+    for frameno in range(num_frames):
+        # confidence difference
+        breaker_vs_bucket[0] += features_base[frameno][4][4]
+        breaker_vs_bucket[0] -= features_base[frameno][4][4]
+        # forearm distance
+        x_forearm = features_base[frameno][1][0]
+        y_forearm = features_base[frameno][1][1]
+        x_breaker = features_base[frameno][4][0]
+        y_breaker = features_base[frameno][4][1]
+        x_bucket = features_base[frameno][5][0]
+        y_bucket = features_base[frameno][5][1]
+        breaker_vs_bucket[1] += math.hypot(x_bucket-x_forearm,y_bucket-y_forearm) / 2
+        breaker_vs_bucket[1] -= math.hypot(x_breaker-x_forearm,y_breaker-y_forearm) / 2
+        breaker_vs_bucket[2] += x_bucket-x_forearm
+        breaker_vs_bucket[2] -= x_breaker-x_forearm
+        breaker_vs_bucket[3] += y_bucket-y_forearm
+        breaker_vs_bucket[3] -= y_breaker-y_forearm
+    # normalize output
+    breaker_vs_bucket[0] /= num_frames
+    breaker_vs_bucket[1] /= num_frames
+    breaker_vs_bucket[2] /= num_frames
+    breaker_vs_bucket[3] /= num_frames
+
+    # total size of each object, in width, height and total size
+    object_size = np.zeros((num_objects, 3))
+    for itemno in range(num_objects):
+        for frameno in range(num_frames):
+            object_size[itemno][0] += features_base[frameno][itemno][2]
+            object_size[itemno][1] += features_base[frameno][itemno][3]
+            object_size[itemno][2] += features_base[frameno][itemno][2] * features_base[frameno][itemno][3]
+        object_size[itemno][0] /= num_frames
+        object_size[itemno][1] /= num_frames
+        object_size[itemno][2] /= num_frames
+
+    # relative size of arm boxes vs cabin boxes
+    object_size_relative = np.zeros((3))
+    object_size_relative[0] = (object_size[1][0] + object_size[2][0] - object_size[0][0] - object_size[3][0]) / 2
+    object_size_relative[1] = (object_size[1][1] + object_size[2][1] - object_size[0][1] - object_size[3][1]) / 2
+    object_size_relative[2] = (object_size[1][2] + object_size[2][2] - object_size[0][2] - object_size[3][2]) / 2
+
+    # cumulative size warping of each object
+    object_size_warping = np.zeros((num_objects, 3))
+    for itemno in range(num_objects):
+        for frameno in range(num_frames-1):
+            object_size_warping[itemno][0] += features_base_diff[frameno][itemno][2]
+            object_size_warping[itemno][1] += features_base_diff[frameno][itemno][3]
+            object_size_warping[itemno][2] += features_base_diff[frameno][itemno][2] * features_base_diff[frameno][itemno][3]
+        object_size_warping[itemno][0] /= num_frames
+        object_size_warping[itemno][1] /= num_frames
+        object_size_warping[itemno][2] /= num_frames
 
     # collect all engineered features
-    output = features_base.flatten().tolist() + features_base_diff.flatten().tolist() + motility.flatten().tolist() + cabindistance.flatten().tolist()
+    output = features_base.flatten().tolist() + \
+        features_base_diff.flatten().tolist() + \
+        motility.flatten().tolist() + \
+        relative_motility.flatten().tolist() + \
+        cabindistance.flatten().tolist() + \
+        breaker_vs_bucket.flatten().tolist() + \
+        object_size.flatten().tolist() + \
+        object_size_relative.flatten().tolist() + \
+        object_size_warping.flatten().tolist()
+
     # check that all values are normalized correctly
     assert(all(i >= -1 for i in output))
     assert(all(i <= 1 for i in output))
