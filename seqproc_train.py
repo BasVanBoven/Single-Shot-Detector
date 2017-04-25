@@ -18,6 +18,7 @@ import signal
 import numpy as np
 import matplotlib.pyplot as plt
 import seqproc_common as sp
+import seqproc_featureno as spf
 from random import shuffle
 from pprint import pprint
 from scipy.stats import mode
@@ -88,7 +89,7 @@ def train_test(chosen_model, X_train, y_train, X_test, y_test):
         indices = np.argsort(importances)[::-1]
         print("Feature ranking:")
         for f in range(X_train.shape[1]):
-            print("%d. feature %d (%f)" % (f + 1, indices[f], importances[indices[f]]))
+            print("%d. feature %d, %s (%f)" % (f + 1, indices[f], spf.featureno(indices[f], args.window), importances[indices[f]]))
     # return result
     return classifier, score
 

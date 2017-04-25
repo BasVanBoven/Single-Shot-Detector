@@ -153,10 +153,6 @@ def window (res_x, res_y, json_batch, augment):
             cabindistance[frameno][itemno][2] = y2-y1
 
     # indicators of breaker / bucket window
-    # [0] = normalized cumulative confidence difference between breaker and bucket
-    # [1] = normalized cumulative forearm distance between breaker and bucket
-    # [2] = normalized cumulative forearm x-distance between breaker and bucket
-    # [3] = normalized cumulative forearm y-distance between breaker and bucket
     breaker_vs_bucket = np.zeros((4))
     for frameno in range(num_frames):
         # confidence difference
@@ -210,7 +206,8 @@ def window (res_x, res_y, json_batch, augment):
         object_size_warping[itemno][2] /= num_frames
 
     # collect all engineered features
-    output = features_base.flatten().tolist() + \
+    output = \
+        features_base.flatten().tolist() + \
         features_base_diff.flatten().tolist() + \
         motility.flatten().tolist() + \
         relative_motility.flatten().tolist() + \
