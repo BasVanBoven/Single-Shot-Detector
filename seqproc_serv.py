@@ -9,8 +9,7 @@ import os
 import pickle
 import numpy as np
 import seqproc_common as sp
-from flask_api import FlaskAPI, status, exceptions
-from flask import request, url_for, jsonify
+from flask import Flask, request, url_for, jsonify
 
 
 # general pathing
@@ -26,7 +25,7 @@ assert(windowsize % 2 != 0)
 
 
 # initialize model server
-app = FlaskAPI(__name__)
+app = Flask(__name__)
 classifier = pickle.load(open(model_file, 'rb'))
 @app.route('/detect_movement/', methods=['POST'])
 def detect_movement():

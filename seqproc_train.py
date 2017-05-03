@@ -38,7 +38,7 @@ parser.add_argument('-r', '--random', default=False, action='store_true', help='
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
 parser.add_argument('-f', '--beta', type=int, default=1, help='beta score to be reported')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
-parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
+parser.add_argument('-c', '--crossval', type=int, default=10, help='number of cross validation splits')
 parser.add_argument('-n', '--noserv', default=False, action='store_true', help='do not start serving after training')
 args = parser.parse_args()
 # window size needs to be uneven to make the majority vote function correctly
@@ -146,10 +146,10 @@ with open(os.path.join(model_folder, 'model.log'), 'wb') as f:
 print 'Model training started...'
 #classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
-classifier, score = train_test(ExtraTreesClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+#classifier, score = train_test(ExtraTreesClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(MLPClassifier(max_iter=2000), X_train, y_train, X_test, y_test)
 #classifier, score = train_test(SVC(), X_train, y_train, X_test, y_test)
-#classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
 y_pred = classifier.predict(X_test)
 
 

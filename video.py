@@ -40,7 +40,7 @@ parser.add_argument('-v', '--video', default='v', help='video that is to be proc
 parser.add_argument('-s', '--skipvids', default=False, action='store_true', help='do not extract the frames from the video again')
 parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
 parser.add_argument('-f', '--framerate', type=float, default=1.0, help='how many frames to store and process per second')
-parser.add_argument('-c', '--confidence-threshold', type=float, default=0.25, help='keep detections with confidence above threshold')
+parser.add_argument('-c', '--confidence-threshold', type=float, default=0.20, help='keep detections with confidence above threshold')
 args = parser.parse_args()
 
 

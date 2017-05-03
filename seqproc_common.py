@@ -102,7 +102,10 @@ def window (res_x, res_y, json_batch, augment):
         # resize objects
         # 1.3 and 0.7 are arbitrary min/max thresholds
         xmin, xmax, ymin, ymax = find_window_limits(features_base)
-        maxscale = min(1/xmax, 1/ymax, 1.3)
+        if xmax == 0 or ymax == 0:
+            maxscale = 1
+        else:
+            maxscale = min(1/xmax, 1/ymax, 1.3)
         minscale = 0.7
         scale = random.uniform(minscale, maxscale)
         for frameno in range(num_frames):
