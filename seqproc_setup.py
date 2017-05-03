@@ -19,6 +19,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import seqproc_common as sp
 from random import shuffle
+from random import randint
 from pprint import pprint
 from scipy.stats import mode
 
@@ -29,6 +30,7 @@ parser.add_argument('-d', '--debug', default=False, action='store_true', help='p
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
 parser.add_argument('-p', '--permutations', type=int, default=10, help='number of augmentation permutations to be generated')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
+parser.add_argument('-m', '--model', type=str, default='', help='ssd model which determines the blacklist')
 parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
 parser.add_argument('-t', '--test', type=float, default=0.2, help='percentage of videos in test set')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
@@ -40,6 +42,7 @@ assert(args.window % 2 != 0)
 
 # general pathing
 rootdir = os.getcwd()
+ssd_rootdir = os.path.join(rootdir, 'builds')
 input_boxes = os.path.join(rootdir, 'video', 'output', 'json')
 input_tags = os.path.join(rootdir, 'video', 'output', 'tags')
 input_resolution = os.path.join(rootdir, 'video', 'output', 'resolution')
@@ -50,6 +53,21 @@ output_traintest = os.path.join(rootdir, 'seqproc', '03_traintest')
 output_train = os.path.join(output_traintest, 'train.csv')
 output_train_augmented = os.path.join(output_traintest, 'train_augmented.csv')
 output_test = os.path.join(output_traintest, 'test.csv')
+
+
+# determine which ssd build to use for the blacklist
+for current in sorted(os.listdir(ssd_rootdir)):
+    ssd_build = current
+if args.model != '':
+    assert(os.path.exists(os.path.join(ssd_rootdir, args.model)))
+    ssd_build = args.model
+
+
+# build video test blacklist, cumbersome solution because of backwards compatibility
+blacklist = []
+for frame in sorted(os.listdir(os.path.join(ssd_rootdir, ssd_build, 'trainval', 'image'))):
+    if frame.rsplit('_',1)[0] not in blacklist:
+        blacklist.append(frame.rsplit('_',1)[0])
 
 
 # initialize output directories
@@ -148,12 +166,20 @@ for root, dirs, files in os.walk(input_boxes):
 
 # window csvs -> train/test split
 print 'Converting window CSVs to train/test split...'
-# determine the number of test videos
-number_train_vids = int(len(os.listdir(output_windows_clean)) * (1-args.test))
+# generate blacklist
+
+# determine the number of test videos and fill lists
+number_test_vids = int(len(os.listdir(output_windows_clean)) * (args.test))
 vids_list = os.listdir(output_windows_clean)
 random.shuffle(vids_list)
-train_list = vids_list[0:number_train_vids]
-test_list = vids_list[number_train_vids:]
+test_list = []
+train_list = []
+while (number_test_vids > len(test_list)):
+    index = randint(0,len(vids_list))
+    if vids_list[index] not in blacklist:
+        test_list.append(vids_list[index])
+        vids_list.remove(vids_list[index])
+train_list = vids_list
 # write train output file
 with open(output_train, 'wb') as f:
     for filename in train_list:
