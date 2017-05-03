@@ -31,7 +31,7 @@ parser.add_argument('-a', '--augment', default=False, action='store_true', help=
 parser.add_argument('-p', '--permutations', type=int, default=10, help='number of augmentation permutations to be generated')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-m', '--model', type=str, default='', help='ssd model which determines the blacklist')
-parser.add_argument('-c', '--crossval', type=int, default=5, help='number of cross validation splits')
+parser.add_argument('-c', '--crossval', type=int, default=10, help='number of cross validation splits')
 parser.add_argument('-t', '--test', type=float, default=0.2, help='percentage of videos in test set')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
 parser.add_argument('-n', '--noserv', default=False, action='store_true', help='do not start serving after training')
@@ -61,8 +61,6 @@ for current in sorted(os.listdir(ssd_rootdir)):
 if args.model != '':
     assert(os.path.exists(os.path.join(ssd_rootdir, args.model)))
     ssd_build = args.model
-
-
 # build video test blacklist, cumbersome solution because of backwards compatibility
 blacklist = []
 for frame in sorted(os.listdir(os.path.join(ssd_rootdir, ssd_build, 'trainval', 'image'))):
@@ -166,8 +164,6 @@ for root, dirs, files in os.walk(input_boxes):
 
 # window csvs -> train/test split
 print 'Converting window CSVs to train/test split...'
-# generate blacklist
-
 # determine the number of test videos and fill lists
 number_test_vids = int(len(os.listdir(output_windows_clean)) * (args.test))
 vids_list = os.listdir(output_windows_clean)
