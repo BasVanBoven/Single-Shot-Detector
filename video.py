@@ -109,6 +109,11 @@ for root, dirs, files in os.walk(folder_input):
                     if (len(line.strip()) != 0):
                         # translate human format to machine format
                         line = line.replace('nodig', '0')
+                        line = line.replace('drive', '0')
+                        line = line.replace('rotate', '0')
+                        line = line.replace('lowerraise', '0')
+                        line = line.replace('standstill', '0')
+                        line = line.replace('notinscene', '0')
                         line = line.replace('dig', '1')
                         line = line.replace('unusable', '2')
                         line = line.replace(':', '')
@@ -211,6 +216,11 @@ for root, dirs, files in os.walk(folder_input):
                         if (len(line.strip()) != 0):
                             # translate human format to machine format
                             line = line.replace('nodig', '0')
+                            line = line.replace('drive', '0')
+                            line = line.replace('rotate', '0')
+                            line = line.replace('lowerraise', '0')
+                            line = line.replace('standstill', '0')
+                            line = line.replace('notinscene', '0')
                             line = line.replace('dig', '1')
                             line = line.replace('unusable', '2')
                             line = line.replace(':', '')
