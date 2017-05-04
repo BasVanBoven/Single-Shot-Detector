@@ -109,6 +109,7 @@ for root, dirs, files in os.walk(folder_input):
     for name in files:
         name, ext = os.path.splitext(name)
         if ext.lower().endswith('.txt'):
+            print ('Processing tags for '+name+'...')    
             with open(os.path.join(root,name+'.txt')) as txt:
                 with open(os.path.join(folder_tags,name+'.csv'), 'w+') as csv:
                     # empty csv file

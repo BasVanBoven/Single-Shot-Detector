@@ -62,6 +62,7 @@ if args.model != '':
     assert(os.path.exists(os.path.join(ssd_rootdir, args.model)))
     ssd_build = args.model
 # build video test blacklist, cumbersome solution because of backwards compatibility
+# it also does not function correctly for videos sourced from YouTube due to weird naming
 blacklist = []
 for frame in sorted(os.listdir(os.path.join(ssd_rootdir, ssd_build, 'trainval', 'image'))):
     if frame.rsplit('_',1)[0] not in blacklist:
