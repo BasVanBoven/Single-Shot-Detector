@@ -36,6 +36,7 @@ parser.add_argument('-d', '--debug', default=False, action='store_true', help='p
 parser.add_argument('-b', '--balance', default=True, action='store_true', help='balance training set')
 parser.add_argument('-r', '--random', default=False, action='store_true', help='perform random classification')
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
+parser.add_argument('-e', '--estimator', type=int, default=3, help='estimator that is to be used')
 parser.add_argument('-f', '--beta', type=int, default=1, help='beta score to be reported')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-c', '--crossval', type=int, default=10, help='number of cross validation splits')
@@ -65,13 +66,6 @@ if (os.path.exists(model_folder)):
 os.makedirs(model_folder, 0755)
 
 
-# calculates f-score
-def fscorer(estimator, X, y):
-    y_pred = estimator.predict(X)
-    score = fbeta_score(y, y_pred, beta=args.beta)
-    return score
-
-
 # trains and tests a generated model
 def train_test(chosen_model, X_train, y_train, X_test, y_test):
     classifier = chosen_model.fit(X_train, y_train)
@@ -82,8 +76,8 @@ def train_test(chosen_model, X_train, y_train, X_test, y_test):
     score = fbeta_score(y_test, y_pred, beta=args.beta)
     model_name = str(type(chosen_model).__name__)
     print(model_name + ' F'+str(args.beta)+' score: ' + str(score))
-    # print feature importances
-    if (args.debug):
+    # print feature importances if applicable
+    if (args.debug and args.solver in [3,4,5]):
         importances = chosen_model.feature_importances_
         std = np.std([tree.feature_importances_ for tree in chosen_model.estimators_],axis=0)
         indices = np.argsort(importances)[::-1]
@@ -144,21 +138,32 @@ with open(os.path.join(model_folder, 'model.log'), 'wb') as f:
     writer.writerows(model_log)
 # train and test a model
 print 'Model training started...'
-#classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
-#classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
-#classifier, score = train_test(ExtraTreesClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
-#classifier, score = train_test(MLPClassifier(max_iter=2000), X_train, y_train, X_test, y_test)
-#classifier, score = train_test(SVC(), X_train, y_train, X_test, y_test)
-classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+# select the right classifier
+assert(args.estimator < 6)
+if args.estimator == 0:
+    classifier, score = train_test(GaussianNB(), X_train, y_train, X_test, y_test)
+elif args.estimator == 1:
+    classifier, score = train_test(MLPClassifier(max_iter=2000), X_train, y_train, X_test, y_test)
+elif args.estimator == 2:
+    classifier, score = train_test(SVC(), X_train, y_train, X_test, y_test)
+elif args.estimator == 3:
+    classifier, score = train_test(AdaBoostClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+elif args.estimator == 4:
+    classifier, score = train_test(ExtraTreesClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+elif args.estimator == 5:
+    classifier, score = train_test(RandomForestClassifier(n_estimators=estimators), X_train, y_train, X_test, y_test)
+# predict on test set
 y_pred = classifier.predict(X_test)
-
-
 # print confusion matrix
 cnf_matrix = confusion_matrix(y_test, y_pred)
 np.set_printoptions(precision=2)
 print_confusion_matrix(cnf_matrix, classes=['No dig', 'Dig'])
 # save model to disk
 pickle.dump(classifier, open(model_file, 'wb'), protocol=2)
+
+# append log to output file
+with open('3dplot.csv', 'a') as output:
+    output.write(str(args.window)+','+str(args.estimator)+','+str(score)+','+str(cnf_matrix[0,0])+','+str(cnf_matrix[0,1])+','+str(cnf_matrix[1,0])+','+str(cnf_matrix[1,1])+'\n')
 
 
 # start serving, old server should have stopped automatically due to changed files

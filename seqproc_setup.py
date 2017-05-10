@@ -30,6 +30,7 @@ parser.add_argument('-d', '--debug', default=False, action='store_true', help='p
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
 parser.add_argument('-p', '--permutations', type=int, default=10, help='number of augmentation permutations to be generated')
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
+parser.add_argument('-e', '--estimator', type=int, default=3, help='estimator that is to be used')
 parser.add_argument('-m', '--model', type=str, default='', help='ssd model which determines the blacklist')
 parser.add_argument('-c', '--crossval', type=int, default=10, help='number of cross validation splits')
 parser.add_argument('-t', '--test', type=float, default=0.2, help='percentage of videos in test set')
@@ -84,7 +85,7 @@ for root, dirs, files in os.walk(input_video):
     for name in files:
         name, ext = os.path.splitext(name)
         if ext.lower().endswith('.txt'):
-            print ('Processing tags for '+name+'...')
+            #print ('Processing tags for '+name+'...')
             with open(os.path.join(root,name+'.txt')) as txt:
                 with open(os.path.join(output_tags,name+'.csv'), 'w+') as tagscsv:
                     # empty csv file
@@ -250,6 +251,8 @@ if args.stop == False:
     cmd = 'python '+rootdir+'/seqproc_train.py'
     cmd += ' -w '
     cmd += str(args.window)
+    cmd += ' -e '
+    cmd += str(args.estimator)    
     cmd += ' -c '
     cmd += str(args.crossval)
     if args.augment == True:
