@@ -49,9 +49,6 @@ folder_input = os.path.join(os.getcwd(), 'video', 'input')
 folder_output = os.path.join(os.getcwd(), 'video', 'output')
 if not os.path.exists(folder_output):
     os.makedirs(folder_output)
-folder_tags = os.path.join(folder_output,'tags')
-if not os.path.exists(folder_tags):
-    os.makedirs(folder_tags)
 folder_resolution = os.path.join(folder_output,'resolution')
 if not os.path.exists(folder_resolution):
     os.makedirs(folder_resolution)
@@ -101,43 +98,6 @@ if args.skipvids == False:
     parameters_output = {}
     detect = dd.delete_service('ssd')
     detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameters_input, parameters_mllib, parameters_output, 'supervised')
-
-
-# assert the txt files directly, just to be sure they are readable
-print ('Converting tags txt to tags csv')
-for root, dirs, files in os.walk(folder_input):
-    for name in files:
-        name, ext = os.path.splitext(name)
-        if ext.lower().endswith('.txt'):
-            print ('Processing tags for '+name+'...')    
-            with open(os.path.join(root,name+'.txt')) as txt:
-                with open(os.path.join(folder_tags,name+'.csv'), 'w+') as csv:
-                    # empty csv file
-                    csv.truncate()
-                    # process per line
-                    for line in txt:
-                        line = line.replace(' ', '')
-                        if (len(line.strip()) != 0):
-                            # translate human format to machine format
-                            line = line.replace('nodig', '0')
-                            line = line.replace('drive', '0')
-                            line = line.replace('rotate', '0')
-                            line = line.replace('lowerraise', '0')
-                            line = line.replace('standstill', '0')
-                            line = line.replace('notinscene', '0')
-                            line = line.replace('dig', '1')
-                            line = line.replace('unusable', '2')
-                            line = line.replace(':', '')
-                            # if the assertion fails, the tag file contains an error
-                            assert len(line.strip()) == 5
-                            # grab from line
-                            minutes = line[0:2]
-                            seconds = line[2:4]
-                            status = line[4:5]
-                            # calculate and push a new csv line
-                            pushlength = (int(seconds) + int(minutes) * 60) + 1
-                            csv.write(str(pushlength)+','+str(status))
-                            csv.write('\n')
 
 
 # recursively process input directory

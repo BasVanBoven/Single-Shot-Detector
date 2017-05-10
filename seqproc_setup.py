@@ -43,9 +43,10 @@ assert(args.window % 2 != 0)
 # general pathing
 rootdir = os.getcwd()
 ssd_rootdir = os.path.join(rootdir, 'builds')
+input_video = os.path.join(os.getcwd(), 'video', 'input')
 input_boxes = os.path.join(rootdir, 'video', 'output', 'json')
-input_tags = os.path.join(rootdir, 'video', 'output', 'tags')
 input_resolution = os.path.join(rootdir, 'video', 'output', 'resolution')
+output_tags = os.path.join(rootdir, 'seqproc', '00_tags')
 output_classifications = os.path.join(rootdir, 'seqproc', '01_classifications')
 output_windows_clean = os.path.join(rootdir, 'seqproc', '02_windows', 'clean')
 output_windows_augmented = os.path.join(rootdir, 'seqproc', '02_windows', 'augmented')
@@ -70,19 +71,58 @@ for frame in sorted(os.listdir(os.path.join(ssd_rootdir, ssd_build, 'trainval', 
 
 
 # initialize output directories
-output_folders = [output_classifications, output_windows_clean, output_windows_augmented, output_traintest]
+output_folders = [output_classifications, output_windows_clean, output_windows_augmented, output_traintest, output_tags]
 for folder in output_folders:
     if (os.path.exists(folder)):
         shutil.rmtree(folder)
     os.makedirs(folder, 0755)
 
 
+# assert the txt files directly, just to be sure they are readable
+print ('Converting tags txt to tags csv')
+for root, dirs, files in os.walk(input_video):
+    for name in files:
+        name, ext = os.path.splitext(name)
+        if ext.lower().endswith('.txt'):
+            print ('Processing tags for '+name+'...')
+            with open(os.path.join(root,name+'.txt')) as txt:
+                with open(os.path.join(output_tags,name+'.csv'), 'w+') as tagscsv:
+                    # empty csv file
+                    tagscsv.truncate()
+                    # process per line
+                    for line in txt:
+                        line = line.replace(' ', '')
+                        if (len(line.strip()) != 0):
+                            # translate human format to machine format
+                            line = line.replace('nodig', '0')
+                            line = line.replace('drive', '0')
+                            line = line.replace('rotate', '0')
+                            line = line.replace('lowerraise', '0')
+                            line = line.replace('standstill', '0')
+                            line = line.replace('notinscene', '0')
+                            line = line.replace('dig', '1')
+                            line = line.replace('unusable', '2')
+                            line = line.replace(':', '')
+                            # if the assertion fails, the tag file contains an error
+                            assert len(line.strip()) == 5
+                            # grab from line
+                            minutes = line[0:2]
+                            seconds = line[2:4]
+                            status = line[4:5]
+                            # calculate and push a new csv line
+                            pushlength = (int(seconds) + int(minutes) * 60) + 1
+                            tagscsv.write(str(pushlength)+','+str(status))
+                            tagscsv.write('\n')
+
+
 # tags -> classification
 print 'Converting tags CSV to classification CSV...'
-for root, dirs, files in os.walk(input_boxes):
-    for video in sorted(dirs):
+for root, dirs, files in os.walk(output_tags):
+    for video in sorted(files[:-4]):
+        # strip extension
+        video = video[:-4]
         # video specific pathing
-        tags_csv = os.path.join(input_tags, video+'.csv')
+        tags_csv = os.path.join(output_tags, video+'.csv')
         classifications_csv = os.path.join(output_classifications, video+'.csv')
         # open tags csv file
         tags = np.genfromtxt(tags_csv, delimiter=',', dtype=int)
@@ -112,8 +152,10 @@ for root, dirs, files in os.walk(input_boxes):
 
 # video frame jsons -> frame csv
 print 'Converting video frame JSONs to window CSVs...'
-for root, dirs, files in os.walk(input_boxes):
-    for video in sorted(dirs):
+for root, dirs, files in os.walk(output_tags):
+    for video in sorted(files[:-4]):
+        # strip extension
+        video = video[:-4]
         # video specific pathing
         classifications_csv = os.path.join(output_classifications, video+'.csv')
         resolution_csv = os.path.join(input_resolution, video+'.csv')
@@ -172,7 +214,7 @@ random.shuffle(vids_list)
 test_list = []
 train_list = []
 while (number_test_vids > len(test_list)):
-    index = randint(0,len(vids_list))
+    index = randint(0,len(vids_list)-1)
     if vids_list[index] not in blacklist:
         test_list.append(vids_list[index])
         vids_list.remove(vids_list[index])
