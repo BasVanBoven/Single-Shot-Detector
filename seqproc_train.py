@@ -23,7 +23,7 @@ from random import shuffle
 from pprint import pprint
 from scipy.stats import mode
 from sklearn.model_selection import train_test_split,cross_val_score
-from sklearn.metrics import classification_report,confusion_matrix,fbeta_score
+from sklearn.metrics import classification_report,confusion_matrix,fbeta_score,roc_auc_score
 from sklearn.naive_bayes import GaussianNB
 from sklearn.ensemble import RandomForestClassifier,AdaBoostClassifier,ExtraTreesClassifier
 from sklearn.neural_network import MLPClassifier
@@ -73,11 +73,14 @@ def train_test(chosen_model, X_train, y_train, X_test, y_test):
     print('Crossval F'+str(args.beta)+': %0.2f (+/- %0.2f)' % (scores.mean(), scores.std() * 2))
     # accuracy scoring on test set
     y_pred = classifier.predict(X_test)
+    if args.debug:
+        probabilities = classifier.predict_proba(X_test)
+        print probabilities
     score = fbeta_score(y_test, y_pred, beta=args.beta)
     model_name = str(type(chosen_model).__name__)
     print(model_name + ' F'+str(args.beta)+' score: ' + str(score))
     # print feature importances if applicable
-    if (args.debug and args.solver in [3,4,5]):
+    if (args.debug and args.estimator in [3,4,5]):
         importances = chosen_model.feature_importances_
         std = np.std([tree.feature_importances_ for tree in chosen_model.estimators_],axis=0)
         indices = np.argsort(importances)[::-1]
@@ -158,6 +161,8 @@ y_pred = classifier.predict(X_test)
 cnf_matrix = confusion_matrix(y_test, y_pred)
 np.set_printoptions(precision=2)
 print_confusion_matrix(cnf_matrix, classes=['No dig', 'Dig'])
+# print AUC score
+print 'AUC Score:',roc_auc_score(y_test, y_pred)
 # save model to disk
 pickle.dump(classifier, open(model_file, 'wb'), protocol=2)
 
