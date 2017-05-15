@@ -1,4 +1,5 @@
 #!/usr/bin/python
+# TODO FIXME THIS SCRIPT IS NOT FUNCTIONAL YET FIXME TODO
 # seqproc_test.py - sends test requests to the sequence_processor API
 
 # input: first frame of window that is to be tested, without extension

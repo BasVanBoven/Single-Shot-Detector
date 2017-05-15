@@ -1,5 +1,5 @@
 #!/usr/bin/python
-# video.py - prepares video's for training the Sequence Processor
+# video.py - prepares videos for training the Sequence Processor
 
 # input: a set of folders containing videoname.ext and videoname.txt in the same directory
 # output: one folder per video, containing jpg-frames (both unannotated and annotated), json-ssd (from DeepDetect) and csv
