@@ -49,7 +49,7 @@ def detect_movement():
 
         # error handling: sequence length does not match window length
         if(len(request.data['seq']) != windowsize):
-            return jsonify({'movement': False, 'err': 'Received sequence length ' + str(len(request.data)) + ' is different from model window length: ' +  str(windowsize)}), 400
+            return jsonify({'movement': False, 'err': 'Received sequence length ' + str(len(request.data['seq'])) + ' is different from model window length: ' +  str(windowsize)}), 400
 
         # read resolution data and point data container to sequence
         json_data = request.data
@@ -62,7 +62,8 @@ def detect_movement():
 
         # predict and return result
         movement = bool(classifier.predict(window))
-        return jsonify({'movement': movement, 'err': ''}), 200
+        probability = classifier.predict_proba(window)
+        return jsonify({'movement': movement, 'probability_movement': probability[0][1], 'probability_no_movement': probability[0][0], 'err': ''}), 200
 
 
     # return error when necessary
