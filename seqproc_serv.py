@@ -37,19 +37,19 @@ def detect_movement():
 
         # error handling: no JSON data received
         if not request.data:
-            return jsonify({'movement': False, 'err': 'No JSON data received'}), 400
+            return jsonify({'digging': False, 'prob_dig': 0, 'prob_no_dig': 0, 'err': 'No JSON data received'}), 400
 
         # error handling: no resolution tag in JSON
         if not request.data['res']:
-            return jsonify({'movement': False, 'err': 'No resolution tag \'res\' in received data'}), 400
+            return jsonify({'digging': False, 'prob_dig': 0, 'prob_no_dig': 0, 'err': 'No resolution tag \'res\' in received data'}), 400
 
         # error handling: no sequence tag in JSON
         if not request.data['seq']:
-            return jsonify({'movement': False, 'err': 'No sequence tag \'seq\' in received data'}), 400
+            return jsonify({'digging': False, 'prob_dig': 0, 'prob_no_dig': 0, 'err': 'No sequence tag \'seq\' in received data'}), 400
 
         # error handling: sequence length does not match window length
         if(len(request.data['seq']) != windowsize):
-            return jsonify({'movement': False, 'err': 'Received sequence length ' + str(len(request.data['seq'])) + ' is different from model window length: ' +  str(windowsize)}), 400
+            return jsonify({'digging': False, 'prob_dig': 0, 'prob_no_dig': 0, 'err': 'Received sequence length ' + str(len(request.data['seq'])) + ' is different from model window length: ' +  str(windowsize)}), 400
 
         # read resolution data and point data container to sequence
         json_data = request.data
@@ -61,9 +61,9 @@ def detect_movement():
         window = sp.window(res_x, res_y, json_data, False)
 
         # predict and return result
-        movement = bool(classifier.predict(window))
+        digging = bool(classifier.predict(window))
         probability = classifier.predict_proba(window)
-        return jsonify({'movement': movement, 'probability_movement': probability[0][1], 'probability_no_movement': probability[0][0], 'err': ''}), 200
+        return jsonify({'digging': digging, 'prob_dig': probability[0][1], 'prob_no_dig': probability[0][0], 'err': ''}), 200
 
 
     # return error when necessary
