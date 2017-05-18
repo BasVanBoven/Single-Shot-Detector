@@ -4,13 +4,14 @@
 
 # imports
 import os
-import io
 import sys
 import json
 import argparse
+import urllib2
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
+from skimage import io
 from scipy.misc import imread
 
 
@@ -29,20 +30,22 @@ def process_image(path_image, path_json, path_output):
     # labelcolors
     labelcolors = {'cabin': 0, 'forearm': 1, 'upperarm': 2, 'wheelbase': 3, 'attachment-bucket': 4, 'attachment-breaker': 5, 'manual-crouching': 6, 'manual-earthrod': 7}
 
-    # pathing
-    path_image = os.path.join(os.getcwd(), path_image)
-    path_json = os.path.join(os.getcwd(), path_json)
-    path_output = os.path.join(os.getcwd(), path_output)
-
     # pyplot settings
     plt.rcParams['figure.figsize'] = (10, 10)
     plt.rcParams['image.interpolation'] = 'nearest'
     plt.rcParams['image.cmap'] = 'gray'
 
     # load input
-    image = imread(path_image)
-    with open(path_json, 'rb') as json_data:
-        detections = json.load(json_data)
+    if path_image.startswith('http'):
+        image = io.imread(path_image)
+    else:
+        image = io.imread(os.path.join(os.getcwd(), path_image))
+    if path_json.startswith('http'):
+        response = urllib2.urlopen(path_json)
+        detections = json.load(response)
+    else:
+        with open(os.path.join(os.getcwd(), path_json), 'rb') as json_data:
+            detections = json.load(json_data)
 
     # image setup: detection colors, axes and background
     colors = plt.cm.hsv(np.linspace(0, 1, 21)).tolist()
@@ -66,7 +69,6 @@ def process_image(path_image, path_json, path_output):
     for i in range(num_detections):
         if ((det[i][1] >= max_conf[det[i][0]]) or args.verbose or det[i][0] in ['manual-crouching' , 'manual-earthrod']):
             det_stripped.append(det[i])
-    print det_stripped
 
     # build output
     for i in range(len(det_stripped)):
@@ -83,7 +85,7 @@ def process_image(path_image, path_json, path_output):
         currentAxis.text(xmin, ymin, display_txt, bbox={'facecolor':color, 'alpha':0.5})
 
     # save output and close all open figures
-    plt.savefig(path_output, bbox_inches='tight')
+    plt.savefig(os.path.join(os.getcwd(), path_output), bbox_inches='tight')
     print ('Processed figure '+path_image)
     plt.close('all')
 
