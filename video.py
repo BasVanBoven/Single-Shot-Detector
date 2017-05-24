@@ -37,10 +37,10 @@ from PIL import Image
 parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
 parser.add_argument('builddir', help='build (timestamp only) that is to be tested')
 parser.add_argument('-v', '--video', default='v', help='video that is to be processed')
-parser.add_argument('-s', '--skipvids', default=False, action='store_true', help='do not extract the frames from the video')
+parser.add_argument('-s', '--skipffm', default=False, action='store_true', help='do not extract the frames from the video')
 parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
 parser.add_argument('-f', '--framerate', type=float, default=1.0, help='how many frames to store and process per second')
-parser.add_argument('-c', '--confidence-threshold', type=float, default=0.20, help='keep detections with confidence above threshold')
+parser.add_argument('-c', '--confidence-threshold', type=float, default=0, help='keep detections with confidence above threshold')
 args = parser.parse_args()
 
 
@@ -89,15 +89,14 @@ shutil.copy2(os.path.join('builds', args.builddir, 'snapshots', recentmodel), 'd
 
 
 # setup DeepDetect service if necessary
-if args.skipvids == False:
-    dd = DD('localhost')
-    dd.set_return_format(dd.RETURN_PYTHON)
-    model = {'repository':'/dockershare/ssd/dedemodel'}
-    parameters_input = {'connector':'image', 'width':512, 'height':512}
-    parameters_mllib = {'nclasses':7}
-    parameters_output = {}
-    detect = dd.delete_service('ssd')
-    detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameters_input, parameters_mllib, parameters_output, 'supervised')
+dd = DD('localhost')
+dd.set_return_format(dd.RETURN_PYTHON)
+model = {'repository':'/dockershare/ssd/dedemodel'}
+parameters_input = {'connector':'image', 'width':512, 'height':512}
+parameters_mllib = {'nclasses':7}
+parameters_output = {}
+detect = dd.delete_service('ssd')
+detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameters_input, parameters_mllib, parameters_output, 'supervised')
 
 
 # recursively process input directory
@@ -107,8 +106,7 @@ for root, dirs, files in os.walk(folder_input):
         if (
             ext.lower().endswith(('.mp4', '.avi', '.mov')) and
             os.path.exists(os.path.join(root,name+'.txt')) and
-            (args.video == 'v' or args.video == name) and
-            args.skipvids == False
+            (args.video == 'v' or args.video == name)
         ):
 
 
@@ -130,14 +128,15 @@ for root, dirs, files in os.walk(folder_input):
 
 
             # video -> jpg_unannotated
-            print ('  Converting video into unannotated frames...')
-            cmd = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "'+root+'/'+name+ext+'"'
-            duration = os.popen(cmd).read()
-            i = 0.5
-            while (i < float(duration)):
-                cmd = 'ffmpeg -y -nostats -loglevel 0 -accurate_seek -ss '+str(int(i)/3600).zfill(2)+':'+str(int(i)/60).zfill(2)+':'+str(int(i)%60).zfill(2)+'.5 -t 00:00:01 -i "'+root+'/'+name+ext+'" -r 1 -f singlejpeg "'+output_jpg_unannotated+'/'+name+'_'+str(int(i)+1).zfill(4)+'.jpg"'
-                os.system(cmd)
-                i = i + 1
+            if args.skipffm == False:
+                print ('  Converting video into unannotated frames...')
+                cmd = 'ffprobe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 "'+root+'/'+name+ext+'"'
+                duration = os.popen(cmd).read()
+                i = 0.5
+                while (i < float(duration)):
+                    cmd = 'ffmpeg -y -nostats -loglevel 0 -accurate_seek -ss '+str(int(i)/3600).zfill(2)+':'+str(int(i)/60).zfill(2)+':'+str(int(i)%60).zfill(2)+'.5 -t 00:00:01 -i "'+root+'/'+name+ext+'" -r 1 -f singlejpeg "'+output_jpg_unannotated+'/'+name+'_'+str(int(i)+1).zfill(4)+'.jpg"'
+                    os.system(cmd)
+                    i = i + 1
 
 
             # jpg_unannotated -> json, jpg_annotated

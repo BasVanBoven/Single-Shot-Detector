@@ -2,12 +2,14 @@ builds/*
 frames/*
 frames_old/*
 testsets/*
+testsets2/*
 testsets_benchmark/*
 temp/*
 video/*
 dedemodel/*
 seqproc/*
 frames.zip
+nohup.out
 dd_client.pyc
 seqproc_common.pyc
-nohup.out
+seqproc_featureno.pyc

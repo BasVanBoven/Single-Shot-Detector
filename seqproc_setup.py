@@ -252,7 +252,7 @@ if args.stop == False:
     cmd += ' -w '
     cmd += str(args.window)
     cmd += ' -e '
-    cmd += str(args.estimator)    
+    cmd += str(args.estimator)
     cmd += ' -c '
     cmd += str(args.crossval)
     if args.augment == True:
