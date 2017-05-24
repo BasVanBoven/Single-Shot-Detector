@@ -95,6 +95,7 @@ for root, dirs, files in os.walk(input_video):
                         line = line.replace(' ', '')
                         if (len(line.strip()) != 0):
                             # translate human format to machine format
+                            # modify these lines to run various experiments
                             line = line.replace('nodig', '0')
                             line = line.replace('drive', '0')
                             line = line.replace('rotate', '0')

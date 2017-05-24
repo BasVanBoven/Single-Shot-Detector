@@ -5,6 +5,7 @@
 # output: one folder per video, containing jpg-frames (both unannotated and annotated), json-ssd (from DeepDetect) and csv
 
 # prerequisites:
+# sudo apt-get update
 # sudo apt-get install software-properties-common
 # sudo add-apt-repository ppa:mc3man/trusty-media
 # sudo apt-get update
@@ -40,7 +41,7 @@ parser.add_argument('-v', '--video', default='v', help='video that is to be proc
 parser.add_argument('-s', '--skipffm', default=False, action='store_true', help='do not extract the frames from the video')
 parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
 parser.add_argument('-f', '--framerate', type=float, default=1.0, help='how many frames to store and process per second')
-parser.add_argument('-c', '--confidence-threshold', type=float, default=0, help='keep detections with confidence above threshold')
+parser.add_argument('-c', '--confidence-threshold', type=float, default=0.1, help='keep detections with confidence above threshold')
 args = parser.parse_args()
 
 
@@ -101,7 +102,7 @@ detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameter
 
 # recursively process input directory
 for root, dirs, files in os.walk(folder_input):
-    for name in files:
+    for name in sorted(files):
         name, ext = os.path.splitext(name)
         if (
             ext.lower().endswith(('.mp4', '.avi', '.mov')) and
