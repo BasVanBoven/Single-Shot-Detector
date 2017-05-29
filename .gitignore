@@ -6,6 +6,7 @@ testsets2/*
 testsets_benchmark/*
 temp/*
 video/*
+video_test/*
 dedemodel/*
 seqproc/*
 frames.zip

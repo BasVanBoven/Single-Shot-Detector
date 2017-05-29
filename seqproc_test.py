@@ -17,6 +17,7 @@ import seqproc_common as sp
 parser = argparse.ArgumentParser(description='Test a Sequence Processor.')
 parser.add_argument('firstframe', help='first frame of window that is to be tested, without extension')
 parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
+parser.add_argument('-p', '--problemsolving', default=False, action='store_true', help='use video_test instead of video as input folder')
 args = parser.parse_args()
 
 
@@ -25,8 +26,12 @@ rootdir = os.getcwd()
 video = args.firstframe[:-5] # strip last 5 characters from string
 firstframenumber = int(args.firstframe[-4:]) # only take last 8-5 characters from string
 server_url = 'http://127.0.0.1:5000/detect_movement/'
-json_folder = os.path.join(rootdir, 'video', 'output', 'json', video)
-resolution_csv = os.path.join(rootdir, 'video', 'output', 'resolution', video+'.csv')
+if args.problemsolving:
+    json_folder = os.path.join(rootdir, 'video_test', 'output', 'json', video)
+    resolution_csv = os.path.join(rootdir, 'video_test', 'output', 'resolution', video+'.csv')
+else:
+    json_folder = os.path.join(rootdir, 'video', 'output', 'json', video)
+    resolution_csv = os.path.join(rootdir, 'video', 'output', 'resolution', video+'.csv')
 model_log = os.path.join(rootdir,'seqproc', '04_model', 'model.log')
 
 

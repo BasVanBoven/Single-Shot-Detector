@@ -1,0 +1,153 @@
+#!/usr/bin/python
+# video.py - prepares videos for training the Sequence Processor
+
+# input: a set of folders containing videoname.ext and videoname.txt in the same directory
+# output: one folder per video, containing jpg-frames (both unannotated and annotated), json-ssd (from DeepDetect) and csv
+
+# prerequisites:
+# sudo apt-get update
+# sudo apt-get install software-properties-common
+# sudo add-apt-repository ppa:mc3man/trusty-media
+# sudo apt-get update
+# sudo apt-get install ffmpeg python-opencv python-imaging
+
+# assumes DeepDetect Docker container is running, run following command on host OS:
+# sudo nvidia-docker run -i -t -p 8080:8080 -v /home/ubuntu/dockershare:/dockershare:rshared beniz/deepdetect_gpu
+# sudo nvidia-docker exec -i -t <ID> /bin/bash
+
+
+# imports
+import argparse
+import math
+import os
+import shutil
+import stat
+import subprocess
+import sys
+import random
+import time
+import datetime
+import cv2
+import re
+import json
+from dd_client import DD
+from PIL import Image
+
+
+# handle input arguments
+parser = argparse.ArgumentParser(description='Process input data for training a Sequence Processor.')
+parser.add_argument('builddir', help='build (timestamp only) that is to be tested')
+parser.add_argument('-v', '--video', default='v', help='video that is to be processed')
+parser.add_argument('-s', '--skipffm', default=False, action='store_true', help='do not extract the frames from the video')
+parser.add_argument('-i', '--iter', type=int, default=0, help='use a specific model iteration')
+parser.add_argument('-f', '--framerate', type=float, default=1.0, help='how many frames to store and process per second')
+parser.add_argument('-c', '--confidence-threshold', type=float, default=0.1, help='keep detections with confidence above threshold')
+args = parser.parse_args()
+
+
+# global pathing
+folder_input = os.path.join(os.getcwd(), 'video_test', 'input')
+folder_output = os.path.join(os.getcwd(), 'video_test', 'output')
+if not os.path.exists(folder_output):
+    os.makedirs(folder_output)
+folder_resolution = os.path.join(folder_output,'resolution')
+if not os.path.exists(folder_resolution):
+    os.makedirs(folder_resolution)
+
+
+# gets the most recent iteration for a certain model build
+def most_recent_iteration(build):
+    files = os.listdir(os.path.join('builds', build, 'snapshots'))
+    mostrecentiteration = 0
+    for name in files:
+        if name.lower().endswith('.caffemodel'):
+            iteration = re.sub('\.caffemodel$', '', name)
+            iteration = re.sub('ssd512x512_iter_', '', iteration)
+            iteration = re.sub('ssd300x300_iter_', '', iteration)
+            if (int(iteration) >= mostrecentiteration):
+                mostrecentmodel = name
+                mostrecentiteration = int(iteration)
+    return mostrecentmodel
+
+
+# build DeepDetect model repo
+if not os.path.exists('dedemodel'):
+    os.makedirs('dedemodel')
+# copy static files
+if not os.path.exists('dedemodel/deploy.prototxt'):
+    shutil.copy2('includes/dede_deploy.prototxt', 'dedemodel/deploy.prototxt')
+if not os.path.exists('dedemodel/corresp.txt'):
+    shutil.copy2('includes/corresp.txt', 'dedemodel/corresp.txt')
+# remove old models
+for root, dirs, files in os.walk('dedemodel'):
+    for name in files:
+        if name.lower().endswith('.caffemodel'):
+            os.remove(os.path.join(root, name))
+# copy new model
+recentmodel = most_recent_iteration(args.builddir)
+print ('Using model ' + recentmodel)
+shutil.copy2(os.path.join('builds', args.builddir, 'snapshots', recentmodel), 'dedemodel/model.caffemodel')
+
+
+# setup DeepDetect service if necessary
+dd = DD('localhost')
+dd.set_return_format(dd.RETURN_PYTHON)
+model = {'repository':'/dockershare/ssd/dedemodel'}
+parameters_input = {'connector':'image', 'width':512, 'height':512}
+parameters_mllib = {'nclasses':7}
+parameters_output = {}
+detect = dd.delete_service('ssd')
+detect = dd.put_service('ssd', model, 'single-shot detector', 'caffe', parameters_input, parameters_mllib, parameters_output, 'supervised')
+
+
+# start processing the video
+print ('Processing video '+args.video+'...')
+
+
+# video specific pathing
+output_jpg_unannotated = os.path.join(folder_output,'jpg_unannotated',args.video)
+if not os.path.exists(output_jpg_unannotated):
+    os.makedirs(output_jpg_unannotated)
+output_jpg_annotated = os.path.join(folder_output,'jpg_annotated',args.video)
+if not os.path.exists(output_jpg_annotated):
+    os.makedirs(output_jpg_annotated)
+output_json = os.path.join(folder_output,'json',args.video)
+if not os.path.exists(output_json):
+    os.makedirs(output_json)
+output_resolution = os.path.join(folder_resolution,args.video+'.csv')
+
+
+# jpg_unannotated -> json, jpg_annotated
+print ('  Processing unannotated frames through DeepDetect...')
+for subroot, subdirs, subfiles in os.walk(output_jpg_unannotated):
+    for frame in sorted(subfiles):
+        parameters_input = {}
+        parameters_mllib = {'gpu':True}
+        parameters_output = {'bbox':True, 'confidence_threshold': args.confidence_threshold}
+        data = [os.path.join(output_jpg_unannotated,frame)]
+        detect = dd.post_predict('ssd',data,parameters_input,parameters_mllib,parameters_output)
+        #print detect
+        if detect['status']['code'] != 200:
+            print '  error',detect['status']['code'],'on',frame
+            break
+        predictions = detect['body']['predictions']
+        with open(os.path.join(output_json,frame[:-4]+'.json'), 'w') as f:
+            json.dump(detect, f)
+            f.close()
+        for p in predictions:
+            img = cv2.imread(p['uri'])
+            # white image background, comment line below to see image behind boxes
+            cv2.rectangle(img,(0,9999),(9999,0),(255,255,255),-1)
+            for c in p['classes']:
+                cat = c['cat']
+                bbox = c['bbox']
+                if c['prob'] > args.confidence_threshold:
+                    cv2.rectangle(img,(int(bbox['xmin']),int(bbox['ymax'])),(int(bbox['xmax']),int(bbox['ymin'])),(0,0,0),2)
+                    cv2.putText(img,cat+' '+str("{0:.2f}".format(c['prob'])),(int(bbox['xmin']),int(bbox['ymax'])),cv2.FONT_HERSHEY_SIMPLEX,1,(0,0,0))
+            cv2.imwrite(os.path.join(output_jpg_annotated,frame[:-4]+'.jpg'),img)
+
+
+# jpg_unannotated -> res.csv
+image = Image.open(os.path.join(output_jpg_unannotated,args.video+'_0001.jpg'))
+with open(output_resolution, 'w+') as res:
+    res.write(str(image.size[0])+','+str(image.size[1])+'\n')
