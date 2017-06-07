@@ -118,30 +118,32 @@ def window (res_x, res_y, json_batch, augment):
         shift_h = random.uniform(0, 1-ymax)
         row = move_boxes(features_base, shift_w, shift_h)
 
-    # construct difference features from base features
-    features_base_diff = np.zeros((num_frames-1, num_objects, num_base_features))
-    for frameno in range(num_frames-1):
-        for itemno in range(num_objects):
-            for featureno in range(num_base_features):
-                # calculate based on previous existing object, to skip detection disappearances
-                prev_existing_object = -1
-                for i in range(frameno, -1, -1):
-                    if features_base[i][itemno][4] != 0:
-                        prev_existing_object = i
-                # only calculate difference if object exists and we can find an existing predecessor (conf > 0)
-                if (features_base[frameno+1][itemno][4] != 0 and prev_existing_object != -1):
-                    features_base_diff[frameno][itemno][featureno] = features_base[frameno+1][itemno][featureno] - features_base[frameno][itemno][featureno]
-
-    # for each object, calculate a motility score over whole window
-    motility = np.zeros((num_objects))
-    for itemno in range(num_objects):
+    if num_frames > 1:
+        # construct difference features from base features
+        features_base_diff = np.zeros((num_frames-1, num_objects, num_base_features))
         for frameno in range(num_frames-1):
-            motility[itemno] += features_base_diff[frameno][itemno][0]
-            motility[itemno] += features_base_diff[frameno][itemno][1]
-        motility[itemno] /= 2*(num_frames-1)
+            for itemno in range(num_objects):
+                for featureno in range(num_base_features):
+                    # calculate based on previous existing object, to skip detection disappearances
+                    prev_existing_object = -1
+                    for i in range(frameno, -1, -1):
+                        if features_base[i][itemno][4] != 0:
+                            prev_existing_object = i
+                    # only calculate difference if object exists and we can find an existing predecessor (conf > 0)
+                    if (features_base[frameno+1][itemno][4] != 0 and prev_existing_object != -1):
+                        features_base_diff[frameno][itemno][featureno] = features_base[frameno+1][itemno][featureno] - features_base[frameno][itemno][featureno]
 
-    # relative motility of arm boxes vs cabin boxes
-    relative_motility = (motility[1] + motility[2] - motility[0] - motility[3]) / 2
+    if num_frames > 1:
+        # for each object, calculate a motility score over whole window
+        motility = np.zeros((num_objects))
+        for itemno in range(num_objects):
+            for frameno in range(num_frames-1):
+                motility[itemno] += features_base_diff[frameno][itemno][0]
+                motility[itemno] += features_base_diff[frameno][itemno][1]
+            motility[itemno] /= 2*(num_frames-1)
+
+        # relative motility of arm boxes vs cabin boxes
+        relative_motility = (motility[1] + motility[2] - motility[0] - motility[3]) / 2
 
     # for each object in each frame, calculate the pythagorean, x and y distance to the cabin
     cabindistance = np.zeros((num_frames, num_objects-1, 3))
@@ -197,28 +199,37 @@ def window (res_x, res_y, json_batch, augment):
     object_size_relative[1] = (object_size[1][1] + object_size[2][1] - object_size[0][1] - object_size[3][1]) / 2
     object_size_relative[2] = (object_size[1][2] + object_size[2][2] - object_size[0][2] - object_size[3][2]) / 2
 
-    # cumulative size warping of each object
-    object_size_warping = np.zeros((num_objects, 3))
-    for itemno in range(num_objects):
-        for frameno in range(num_frames-1):
-            object_size_warping[itemno][0] += features_base_diff[frameno][itemno][2]
-            object_size_warping[itemno][1] += features_base_diff[frameno][itemno][3]
-            object_size_warping[itemno][2] += features_base_diff[frameno][itemno][2] * features_base_diff[frameno][itemno][3]
-        object_size_warping[itemno][0] /= num_frames
-        object_size_warping[itemno][1] /= num_frames
-        object_size_warping[itemno][2] /= num_frames
+    if num_frames > 1:
+        # cumulative size warping of each object
+        object_size_warping = np.zeros((num_objects, 3))
+        for itemno in range(num_objects):
+            for frameno in range(num_frames-1):
+                object_size_warping[itemno][0] += features_base_diff[frameno][itemno][2]
+                object_size_warping[itemno][1] += features_base_diff[frameno][itemno][3]
+                object_size_warping[itemno][2] += features_base_diff[frameno][itemno][2] * features_base_diff[frameno][itemno][3]
+            object_size_warping[itemno][0] /= num_frames
+            object_size_warping[itemno][1] /= num_frames
+            object_size_warping[itemno][2] /= num_frames
 
     # collect all engineered features
-    output = \
-        features_base.flatten().tolist() + \
-        features_base_diff.flatten().tolist() + \
-        motility.flatten().tolist() + \
-        relative_motility.flatten().tolist() + \
-        cabindistance.flatten().tolist() + \
-        breaker_vs_bucket.flatten().tolist() + \
-        object_size.flatten().tolist() + \
-        object_size_relative.flatten().tolist() + \
-        object_size_warping.flatten().tolist()
+    if num_frames > 1:
+        output = \
+            features_base.flatten().tolist() + \
+            features_base_diff.flatten().tolist() + \
+            motility.flatten().tolist() + \
+            relative_motility.flatten().tolist() + \
+            cabindistance.flatten().tolist() + \
+            breaker_vs_bucket.flatten().tolist() + \
+            object_size.flatten().tolist() + \
+            object_size_relative.flatten().tolist() + \
+            object_size_warping.flatten().tolist()
+    else:
+        output = \
+            features_base.flatten().tolist() + \
+            cabindistance.flatten().tolist() + \
+            breaker_vs_bucket.flatten().tolist() + \
+            object_size.flatten().tolist() + \
+            object_size_relative.flatten().tolist()
 
     # check that all values are normalized correctly
     assert(all(i >= -1 for i in output))

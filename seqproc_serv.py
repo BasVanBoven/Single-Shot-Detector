@@ -68,7 +68,7 @@ def detect_movement():
 
     # return error when necessary
     except:
-        raise
+        return jsonify({'digging': False, 'prob_dig': 0, 'prob_no_dig': 0, 'err': 'An undefined error occurred'}), 400
 
 
 # run server

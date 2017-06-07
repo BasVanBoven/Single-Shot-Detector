@@ -162,13 +162,14 @@ cnf_matrix = confusion_matrix(y_test, y_pred)
 np.set_printoptions(precision=2)
 print_confusion_matrix(cnf_matrix, classes=['No dig', 'Dig'])
 # print AUC score
-print 'AUC Score:',roc_auc_score(y_test, y_pred)
+auc_score = roc_auc_score(y_test, y_pred)
+print 'AUC Score:',auc_score
 # save model to disk
 pickle.dump(classifier, open(model_file, 'wb'), protocol=2)
 
 # append log to output file
 with open('3dplot.csv', 'a') as output:
-    output.write(str(args.window)+','+str(args.estimator)+','+str(score)+','+str(cnf_matrix[0,0])+','+str(cnf_matrix[0,1])+','+str(cnf_matrix[1,0])+','+str(cnf_matrix[1,1])+'\n')
+    output.write(str(args.window)+','+str(args.estimator)+','+str(auc_score)+','+str(cnf_matrix[0,0])+','+str(cnf_matrix[0,1])+','+str(cnf_matrix[1,0])+','+str(cnf_matrix[1,1])+'\n')
 
 
 # start serving, old server should have stopped automatically due to changed files

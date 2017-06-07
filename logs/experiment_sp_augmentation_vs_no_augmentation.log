@@ -1,0 +1,194 @@
+AUGMENT
+root@e5541a9c1069:/dockershare/ssd# python seqproc_setup.py -d -a
+Converting tags txt to tags csv
+Converting tags CSV to classification CSV...
+Converting video frame JSONs to window CSVs...
+Converting window CSVs to train/test split...
+Train - shape: (23878, 395) (23878,)
+Test - shape: (698, 395) (698,)
+Train - data points, features: (23878, 396)
+Test  - data points, features: (698, 396)
+Train - digging windows: 11939, nodig windows: 11939
+Test  - digging windows: 417, nodig windows: 281
+Model training started...
+Crossval F1: 0.97 (+/- 0.01)
+[[ 0.49374761  0.50625239]
+ [ 0.49628988  0.50371012]
+ [ 0.49421521  0.50578479]
+ ...,
+ [ 0.50019568  0.49980432]
+ [ 0.50345048  0.49654952]
+ [ 0.50266555  0.49733445]]
+AdaBoostClassifier F1 score: 0.863636363636
+Feature ranking:
+1. feature 94, base feature cabin conf frame 4 (0.018000)
+2. feature 224, base feature difference forearm conf frame 3 (0.016000)
+3. feature 246, base feature difference upperarm Cy frame 4 (0.014000)
+4. feature 19, base feature wheelbase conf frame 1 (0.014000)
+5. feature 134, base feature forearm conf frame 5 (0.012000)
+6. feature 186, base feature difference upperarm Cy frame 2 (0.012000)
+7. feature 249, base feature difference upperarm conf frame 4 (0.012000)
+8. feature 216, base feature difference upperarm Cy frame 3 (0.012000)
+9. feature 220, base feature difference forearm Cx frame 3 (0.010000)
+10. feature 204, base feature difference bucket conf frame 2 (0.010000)
+11. feature 109, base feature wheelbase conf frame 4 (0.010000)
+12. feature 260, base feature difference bucket Cx frame 4 (0.010000)
+13. feature 259, base feature difference wheelbase conf frame 4 (0.010000)
+14. feature 29, base feature breaker conf frame 1 (0.010000)
+15. feature 251, base feature difference forearm Cy frame 4 (0.010000)
+16. feature 69, base feature upperarm conf frame 3 (0.010000)
+16. feature 69, base feature upperarm conf frame 3 (0.010000)
+17. feature 64, base feature cabin conf frame 3 (0.010000)
+18. feature 84, base feature bucket conf frame 3 (0.010000)
+19. feature 375, relative object size x (0.010000)
+20. feature 381, object size warping x upperarm (0.010000)
+21. feature 192, base feature difference forearm W frame 2 (0.010000)
+22. feature 144, base feature bucket conf frame 5 (0.010000)
+23. feature 170, base feature difference bucket Cx frame 1 (0.010000)
+24. feature 162, base feature difference forearm W frame 1 (0.010000)
+25. feature 156, base feature difference upperarm Cy frame 1 (0.010000)
+26. feature 174, base feature difference bucket conf frame 1 (0.008000)
+27. feature 230, base feature difference bucket Cx frame 3 (0.008000)
+28. feature 157, base feature difference upperarm W frame 1 (0.008000)
+29. feature 191, base feature difference forearm Cy frame 2 (0.008000)
+30. feature 254, base feature difference forearm conf frame 4 (0.008000)
+31. feature 273, motility wheelbase (0.008000)
+32. feature 152, base feature difference cabin W frame 1 (0.008000)
+33. feature 336, object cabin distance y breaker frame 4 (0.008000)
+34. feature 194, base feature difference forearm conf frame 2 (0.008000)
+35. feature 124, base feature cabin conf frame 5 (0.008000)
+36. feature 199, base feature difference wheelbase conf frame 2 (0.008000)
+37. feature 269, base feature difference breaker conf frame 4 (0.008000)
+38. feature 133, base feature forearm H frame 5 (0.008000)
+39. feature 353, breaker vs bucket forearm distance x+y (0.008000)
+40. feature 176, base feature difference breaker Cy frame 1 (0.008000)
+41. feature 355, breaker vs bucket forarm distance y (0.008000)
+42. feature 214, base feature difference cabin conf frame 3 (0.008000)
+43. feature 362, object size x+y forearm (0.008000)
+44. feature 240, base feature difference cabin Cx frame 4 (0.008000)
+45. feature 4, base feature cabin conf frame 1 (0.008000)
+46. feature 221, base feature difference forearm Cy frame 3 (0.008000)
+47. feature 219, base feature difference upperarm conf frame 3 (0.008000)
+48. feature 227, base feature difference wheelbase W frame 3 (0.006000)
+49. feature 253, base feature difference forearm H frame 4 (0.006000)
+50. feature 150, base feature difference cabin Cx frame 1 (0.006000)
+51. feature 239, base feature difference breaker conf frame 3 (0.006000)
+52. feature 24, base feature bucket conf frame 1 (0.006000)
+53. feature 14, base feature forearm conf frame 1 (0.006000)
+54. feature 385, object size warping y forearm (0.006000)
+55. feature 158, base feature difference upperarm H frame 1 (0.006000)
+56. feature 159, base feature difference upperarm conf frame 1 (0.006000)
+57. feature 9, base feature upperarm conf frame 1 (0.006000)
+58. feature 161, base feature difference forearm Cy frame 1 (0.006000)
+59. feature 377, object size warping x+y cabin (0.006000)
+60. feature 163, base feature difference forearm H frame 1 (0.006000)
+61. feature 164, base feature difference forearm conf frame 1 (0.006000)
+62. feature 166, base feature difference wheelbase Cy frame 1 (0.006000)
+63. feature 303, object cabin distance y bucket frame 2 (0.006000)
+64. feature 228, base feature difference wheelbase H frame 3 (0.006000)
+65. feature 171, base feature difference bucket Cy frame 1 (0.006000)
+66. feature 288, object cabin distance y bucket frame 1 (0.006000)
+
+Confusion matrix
+[[223  58]
+ [ 56 361]]
+AUC Score: 0.829650870051
+Started serving the trained model in the background...
+nohup: appending output to 'nohup.out'
+
+
+
+
+NON-AUGMENT
+root@e5541a9c1069:/dockershare/ssd# python seqproc_train.py -d
+Train - shape: (2386, 395) (2386,)
+Test - shape: (698, 395) (698,)
+Train - data points, features: (2386, 396)
+Test  - data points, features: (698, 396)
+Train - digging windows: 1193, nodig windows: 1193
+Test  - digging windows: 417, nodig windows: 281
+Model training started...
+Crossval F1: 0.88 (+/- 0.04)
+[[ 0.49610922  0.50389078]
+ [ 0.49601508  0.50398492]
+ [ 0.49615891  0.50384109]
+ ...,
+ [ 0.50365627  0.49634373]
+ [ 0.50801804  0.49198196]
+ [ 0.50621247  0.49378753]]
+AdaBoostClassifier F1 score: 0.866666666667
+Feature ranking:
+1. feature 353, breaker vs bucket forearm distance x+y (0.016000)
+2. feature 270, motility cabin (0.014000)
+3. feature 271, motility upperarm (0.012000)
+4. feature 293, object cabin distance x upperarm frame 2 (0.012000)
+5. feature 171, base feature difference bucket Cy frame 1 (0.012000)
+6. feature 231, base feature difference bucket Cy frame 3 (0.012000)
+7. feature 216, base feature difference upperarm Cy frame 3 (0.012000)
+8. feature 130, base feature forearm Cx frame 5 (0.012000)
+9. feature 210, base feature difference cabin Cx frame 3 (0.010000)
+10. feature 186, base feature difference upperarm Cy frame 2 (0.010000)
+11. feature 375, relative object size x (0.010000)
+12. feature 174, base feature difference bucket conf frame 1 (0.010000)
+13. feature 94, base feature cabin conf frame 4 (0.010000)
+14. feature 365, object size x+y wheelbase (0.010000)
+15. feature 246, base feature difference upperarm Cy frame 4 (0.010000)
+16. feature 156, base feature difference upperarm Cy frame 1 (0.008000)
+17. feature 150, base feature difference cabin Cx frame 1 (0.008000)
+18. feature 136, base feature wheelbase Cy frame 5 (0.008000)
+19. feature 163, base feature difference forearm H frame 1 (0.008000)
+20. feature 325, object cabin distance x+y forearm frame 4 (0.008000)
+21. feature 183, base feature difference cabin H frame 2 (0.008000)
+22. feature 250, base feature difference forearm Cx frame 4 (0.008000)
+23. feature 217, base feature difference upperarm W frame 3 (0.008000)
+24. feature 13, base feature forearm H frame 1 (0.008000)
+25. feature 57, base feature breaker W frame 2 (0.008000)
+26. feature 381, object size warping x upperarm (0.008000)
+27. feature 51, base feature bucket Cy frame 2 (0.008000)
+28. feature 260, base feature difference bucket Cx frame 4 (0.008000)
+29. feature 263, base feature difference bucket H frame 4 (0.008000)
+30. feature 228, base feature difference wheelbase H frame 3 (0.006000)
+31. feature 158, base feature difference upperarm H frame 1 (0.006000)
+32. feature 133, base feature forearm H frame 5 (0.006000)
+33. feature 11, base feature forearm Cy frame 1 (0.006000)
+34. feature 328, object cabin distance x+y wheelbase frame 4 (0.006000)
+35. feature 71, base feature forearm Cy frame 3 (0.006000)
+36. feature 142, base feature bucket W frame 5 (0.006000)
+37. feature 309, object cabin distance y upperarm frame 3 (0.006000)
+38. feature 143, base feature bucket H frame 5 (0.006000)
+39. feature 28, base feature breaker H frame 1 (0.006000)
+40. feature 230, base feature difference bucket Cx frame 3 (0.006000)
+41. feature 180, base feature difference cabin Cx frame 2 (0.006000)
+42. feature 185, base feature difference upperarm Cx frame 2 (0.006000)
+43. feature 308, object cabin distance x upperarm frame 3 (0.006000)
+44. feature 276, relative motility (0.006000)
+45. feature 19, base feature wheelbase conf frame 1 (0.006000)
+46. feature 305, object cabin distance x breaker frame 2 (0.006000)
+47. feature 21, base feature bucket Cy frame 1 (0.006000)
+48. feature 141, base feature bucket Cy frame 5 (0.006000)
+49. feature 15, base feature wheelbase Cx frame 1 (0.006000)
+50. feature 245, base feature difference upperarm Cx frame 4 (0.006000)
+51. feature 251, base feature difference forearm Cy frame 4 (0.006000)
+52. feature 368, object size x+y bucket (0.006000)
+53. feature 367, object size y wheelbase (0.006000)
+54. feature 73, base feature forearm H frame 3 (0.006000)
+55. feature 258, base feature difference wheelbase H frame 4 (0.006000)
+56. feature 259, base feature difference wheelbase conf frame 4 (0.006000)
+57. feature 84, base feature bucket conf frame 3 (0.006000)
+58. feature 93, base feature cabin H frame 4 (0.006000)
+59. feature 273, motility wheelbase (0.006000)
+60. feature 200, base feature difference bucket Cx frame 2 (0.006000)
+61. feature 100, base feature forearm Cx frame 4 (0.006000)
+62. feature 101, base feature forearm Cy frame 4 (0.006000)
+63. feature 102, base feature forearm W frame 4 (0.006000)
+64. feature 110, base feature bucket Cx frame 4 (0.006000)
+65. feature 220, base feature difference forearm Cx frame 3 (0.006000)
+66. feature 222, base feature difference forearm W frame 3 (0.004000)
+
+Confusion matrix
+[[222  59]
+ [ 53 364]]
+AUC Score: 0.831468632923
+Started serving the trained model in the background...
+
+nohup: appending output to 'nohup.out'

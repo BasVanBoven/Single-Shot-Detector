@@ -1,4 +1,4 @@
-#!/usr/bin/python
+2017-0#!/usr/bin/python
 # benchmark.py - benchmarks a Single Shot Detector
 
 
@@ -31,7 +31,7 @@ rootdir = os.getcwd()
 # caffe root directory
 rootcaffe = '/caffe'
 # test directory
-testdir = 'testsets'
+testdir = 'testsets_benchmark'
 emptydir = 'emptyscenes'
 testpath = os.path.join(rootdir, testdir)
 # determines which build to use

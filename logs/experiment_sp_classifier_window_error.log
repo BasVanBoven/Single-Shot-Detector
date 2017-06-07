@@ -1,0 +1,232 @@
+root@e5541a9c1069:/dockershare/ssd# python seqproc_3dplot.py
+
+Processing for 3 0 0 ...
+Model training started...
+Crossval F1: 0.72 (+/- 0.05)
+GaussianNB F1 score: 0.726130653266
+Confusion matrix
+[[191  90]
+ [128 289]]
+AUC Score: 0.68638043302
+
+Processing for 3 1 0 ...
+Model training started...
+Crossval F1: 0.84 (+/- 0.06)
+MLPClassifier F1 score: 0.850546780073
+Confusion matrix
+[[225  56]
+ [ 67 350]]
+AUC Score: 0.820020140471
+
+Processing for 3 2 0 ...
+Model training started...
+Crossval F1: 0.77 (+/- 0.02)
+SVC F1 score: 0.779617834395
+Confusion matrix
+[[219  62]
+ [111 306]]
+AUC Score: 0.756586190123
+
+Processing for 3 3 0 ...
+Model training started...
+Crossval F1: 0.89 (+/- 0.04)
+AdaBoostClassifier F1 score: 0.874851013111
+Confusion matrix
+[[226  55]
+ [ 50 367]]
+AUC Score: 0.842183192947
+
+Processing for 3 4 0 ...
+Model training started...
+Crossval F1: 0.89 (+/- 0.04)
+ExtraTreesClassifier F1 score: 0.860267314702
+Confusion matrix
+[[229  52]
+ [ 63 354]]
+AUC Score: 0.831933741263
+
+Processing for 5 0 0 ...
+Model training started...
+Crossval F1: 0.71 (+/- 0.04)
+GaussianNB F1 score: 0.
+Confusion matrix
+[[187  94]
+ [123 294]]
+AUC Score: 0.685258199135
+
+Processing for 5 1 0 ...
+Model training started...
+Crossval F1: 0.84 (+/- 0.04)
+MLPClassifier F1 score: 0.844282238443
+Confusion matrix
+[[223  58]
+ [ 70 347]]
+AUC Score: 0.812864299308
+
+Processing for 5 2 0 ...
+Model training started...
+Crossval F1: 0.77 (+/- 0.04)
+SVC F1 score: 0.772378516624
+Confusion matrix
+[[218  63]
+ [115 302]]
+AUC Score: 0.750010667622
+
+Processing for 5 3 0 ...
+Model training started...
+Crossval F1: 0.87 (+/- 0.05)
+AdaBoostClassifier F1 score: 0.853688029021
+Confusion matrix
+[[224  57]
+ [ 64 353]]
+AUC Score: 0.821837903343
+
+Processing for 5 4 0 ...
+Model training started...
+Crossval F1: 0.89 (+/- 0.04)
+ExtraTreesClassifier F1 score: 0.859241126071
+Confusion matrix
+[[232  49]
+ [ 66 351]]
+AUC Score: 0.833674697253
+
+Processing for 7 0 0 ...
+Model training started...
+Crossval F1: 0.72 (+/- 0.04)
+GaussianNB F1 score: 0.730673316708
+Confusion matrix
+[[189  92]
+ [124 293]]
+AUC Score: 0.687617877228
+
+Processing for 7 1 0 ...
+Model training started...
+Crossval F1: 0.85 (+/- 0.02)
+MLPClassifier F1 score: 0.848413631022
+Confusion matrix
+[[208  73]
+ [ 56 361]]
+AUC Score: 0.802960478592
+
+Processing for 7 2 0 ...
+Model training started...
+Crossval F1: 0.77 (+/- 0.05)
+SVC F1 score: 0.773946360153
+Confusion matrix
+[[218  63]
+ [114 303]]
+AUC Score: 0.75120970839
+
+Processing for 7 3 0 ...
+Model training started...
+Crossval F1: 0.89 (+/- 0.03)
+AdaBoostClassifier F1 score: 0.87648456057
+Confusion matrix
+[[225  56]
+ [ 48 369]]
+AUC Score: 0.842801915052
+
+Processing for 7 4 0 ...
+Model training started...
+Crossval F1: 0.89 (+/- 0.03)
+ExtraTreesClassifier F1 score: 0.865127582017
+Confusion matrix
+[[231  50]
+ [ 61 356]]
+AUC Score: 0.837890541659
+
+Processing for 9 0 0 ...
+Model training started...
+Crossval F1: 0.71 (+/- 0.04)
+GaussianNB F1 score: 0.730913642053
+Confusion matrix
+[[191  90]
+ [125 292]]
+AUC Score: 0.689977555322
+
+Processing for 9 1 0 ...
+Model training started...
+Crossval F1: 0.84 (+/- 0.04)
+MLPClassifier F1 score: 0.840882694541
+Confusion matrix
+[[199  82]
+ [ 55 362]]
+AUC Score: 0.788145284484
+
+Processing for 9 2 0 ...
+Model training started...
+Crossval F1: 0.77 (+/- 0.06)
+SVC F1 score: 0.771794871795
+Confusion matrix
+[[219  62]
+ [116 301]]
+AUC Score: 0.750590986286
+
+Processing for 9 3 0 ...
+Model training started...
+Crossval F1: 0.89 (+/- 0.03)
+AdaBoostClassifier F1 score: 0.881720430108
+Confusion matrix
+[[230  51]
+ [ 48 369]]
+AUC Score: 0.851698712205
+
+Processing for 9 4 0 ...
+Model training started...
+Crossval F1: 0.90 (+/- 0.06)
+ExtraTreesClassifier F1 score: 0.869879518072
+Confusion matrix
+[[229  52]
+ [ 56 361]]
+AUC Score: 0.840327026635
+
+Processing for 11 0 0 ...
+Model training started...
+Crossval F1: 0.72 (+/- 0.07)
+GaussianNB F1 score: 0.729323308271
+Confusion matrix
+[[191  90]
+ [126 291]]
+AUC Score: 0.688778514555
+
+Processing for 11 1 0 ...
+Model training started...
+Crossval F1: 0.85 (+/- 0.04)
+MLPClassifier F1 score: 0.848056537102
+Confusion matrix
+[[209  72]
+ [ 57 360]]
+AUC Score: 0.803540797255
+
+Processing for 11 2 0 ...
+Model training started...
+Crossval F1: 0.76 (+/- 0.07)
+SVC F1 score: 0.775095298602
+Confusion matrix
+[[216  65]
+ [112 305]]
+AUC Score: 0.750049071063
+
+Processing for 11 3 0 ...
+Model training started...
+Crossval F1: 0.87 (+/- 0.04)
+AdaBoostClassifier F1 score: 0.886255924171
+Confusion matrix
+[[228  53]
+ [ 43 374]]
+AUC Score: 0.85413519718
+
+Processing for 11 4 0 ...
+Model training started...
+Crossval F1: 0.90 (+/- 0.02)
+ExtraTreesClassifier F1 score: 0.857493857494
+Confusion matrix
+[[233  48]
+ [ 68 349]]
+AUC Score: 0.833055975149
+
+[[ 0.6863804  0.8200201  0.7565862  0.8421832  0.8319337]
+ [ 0.6852582  0.8128643  0.7500107  0.8218379  0.8336747]
+ [ 0.6876179  0.8029605  0.7512097  0.8428019  0.8378905]
+ [ 0.6899776  0.7881453  0.750591   0.8516987  0.840327 ]
+ [ 0.6887785  0.8035408  0.7500491  0.8541352  0.833056 ]]

@@ -8,6 +8,7 @@
 # imports
 import json
 import os
+import sys
 import pickle
 import time
 import itertools
@@ -32,6 +33,7 @@ parser.add_argument('-p', '--permutations', type=int, default=10, help='number o
 parser.add_argument('-w', '--window', type=int, default=5, help='window size to be used, needs to be an odd number')
 parser.add_argument('-e', '--estimator', type=int, default=3, help='estimator that is to be used')
 parser.add_argument('-m', '--model', type=str, default='', help='ssd model which determines the blacklist')
+parser.add_argument('-l', '--testlist', default=False, action='store_true', help='open testing whitelist for consistent experiments')
 parser.add_argument('-c', '--crossval', type=int, default=10, help='number of cross validation splits')
 parser.add_argument('-t', '--test', type=float, default=0.2, help='percentage of videos in test set')
 parser.add_argument('-s', '--stop', default=False, action='store_true', help='do not start training after setup')
@@ -70,6 +72,13 @@ for frame in sorted(os.listdir(os.path.join(ssd_rootdir, ssd_build, 'trainval', 
     if frame.rsplit('_',1)[0] not in blacklist:
         blacklist.append(frame.rsplit('_',1)[0])
 
+# build test set whitelist if necessary
+whitelist_test_set = []
+if args.testlist:
+    with open('seqproc_test_list.csv', 'r') as whitelist:
+        reader = csv.reader(whitelist)
+        whitelist_test_set = list(reader)
+        whitelist_test_set = whitelist_test_set[0]
 
 # initialize output directories
 output_folders = [output_classifications, output_windows_clean, output_windows_augmented, output_traintest, output_tags]
@@ -215,12 +224,24 @@ vids_list = os.listdir(output_windows_clean)
 random.shuffle(vids_list)
 test_list = []
 train_list = []
-while (number_test_vids > len(test_list)):
-    index = randint(0,len(vids_list)-1)
-    if vids_list[index] not in blacklist:
-        test_list.append(vids_list[index])
-        vids_list.remove(vids_list[index])
-train_list = vids_list
+# split train/test lists
+# two modes: either build split manually or import a test list
+# the imported list should have already taken the blacklist into account
+if args.testlist:
+    test_list = whitelist_test_set
+    for vid in vids_list:
+        if vid not in test_list:
+            train_list.append(vid)
+    # assert that the imported list takes the blacklist into account
+    for vid in test_list:
+        assert (vid not in blacklist)
+else:
+    while (number_test_vids > len(test_list)):
+        index = randint(0,len(vids_list)-1)
+        if vids_list[index] not in blacklist:
+            test_list.append(vids_list[index])
+            vids_list.remove(vids_list[index])
+    train_list = vids_list
 # write train output file
 with open(output_train, 'wb') as f:
     for filename in train_list:

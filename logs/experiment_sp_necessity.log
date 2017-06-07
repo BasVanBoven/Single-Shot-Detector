@@ -1,0 +1,21 @@
+Train - shape: (12210, 70) (12210,)
+Test - shape: (3562, 70) (3562,)
+Train - data points, features: (12210, 71)
+Test  - data points, features: (3562, 71)
+Train - digging windows: 6105, nodig windows: 6105
+Test  - digging windows: 2094, nodig windows: 1468
+Model training started...
+Crossval F1: 0.88 (+/- 0.02)
+[[ 0.49869653  0.50130347]
+ [ 0.49926093  0.50073907]
+ [ 0.49751414  0.50248586]
+ ...,
+ [ 0.50243419  0.49756581]
+ [ 0.50200534  0.49799466]
+
+ [ 0.50342766  0.49657234]]
+AdaBoostClassifier F1 score: 0.801789077213
+Confusion matrix
+[[1017  451]
+ [ 391 1703]]
+AUC Score: 0.753027659148

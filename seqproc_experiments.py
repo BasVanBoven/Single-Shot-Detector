@@ -22,10 +22,10 @@ if args.destroy:
 for windowsize in range(3, 12, 2):
     # do for 5 solvers (GaussianNB, SVC, MLP, AdaBoost, RF)
     for solver in range(5):
-        # do for 10 train/test splits
-        for split in range(10):
+        # do for 1 readymade train/test split
+        for split in range(1):
             print 'Processing for',windowsize,solver,split,'...'
-            cmd = ['python','seqproc_setup.py', '-w', str(windowsize), '-e', str(solver), '-n']
+            cmd = ['python','seqproc_setup.py', '-w', str(windowsize), '-e', str(solver), '-n', '-l']
             subprocess.Popen(cmd).wait()
 
 # translate generated file to a plottable array
@@ -33,7 +33,7 @@ source = np.genfromtxt('3dplot.csv', delimiter=',', dtype=float)
 plottable = np.zeros((5, 5), dtype=float)
 for row in source:
     plottable[(int(row[0])/2)-1,int(row[1])] += row[2]
-plottable /= 10
+plottable /= 1
 
 # print output
 print plottable

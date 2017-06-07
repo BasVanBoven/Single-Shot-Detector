@@ -1,0 +1,376 @@
+Testing model 2017-05-30_10.47.29:
+
+Accuracy for crouching: 97.78
+   manual-crouching 45 44 0.98
+
+Accuracy for spear-breaker: 86.72
+   forearm 49 29 0.59
+   wheelbase 50 50 1.00
+   attachment-breaker 50 46 0.92
+   upperarm 42 35 0.83
+   cabin 50 49 0.98
+
+Accuracy for manualexcavation: 87.59
+   manual-crouching 13 9 0.69
+   forearm 55 28 0.51
+   attachment-bucket 50 48 0.96
+   wheelbase 56 55 0.98
+   upperarm 53 52 0.98
+   manual-earthrod 41 41 1.00
+   cabin 14 14 1.00
+
+Accuracy for spear-bucket-small: 81.67
+   forearm 48 28 0.58
+   attachment-bucket 50 36 0.72
+   wheelbase 50 48 0.96
+   upperarm 43 35 0.81
+   cabin 49 49 1.00
+
+Accuracy for earthrod1: 66.67
+   manual-earthrod 18 12 0.67
+
+Accuracy for earthrod2: 0.00
+   manual-earthrod 29 0 0.00
+
+Accuracy for spear-bucket-large: 85.02
+   forearm 50 38 0.76
+   attachment-bucket 47 25 0.53
+   wheelbase 50 50 1.00
+   upperarm 50 47 0.94
+   cabin 50 50 1.00
+
+Accuracy for crawl: 86.94
+  forearm 49 40 0.82
+  attachment-bucket 41 35 0.85
+  wheelbase 49 47 0.96
+  attachment-breaker 8 0 0.00
+  upperarm 49 43 0.88
+  cabin 49 48 0.98
+
+
+False positives: 6
+
+
+
+
+
+Testing model 2017-05-24_14.06.31:
+
+Accuracy for crouching: 95.56
+   manual-crouching 45 43 0.96
+
+Accuracy for spear-breaker: 81.33
+   forearm 49 28 0.57
+   wheelbase 50 50 1.00
+   attachment-breaker 50 41 0.82
+   upperarm 42 32 0.76
+   cabin 50 45 0.90
+
+Accuracy for manualexcavation: 80.50
+   manual-crouching 13 6 0.46
+   forearm 55 20 0.36
+   attachment-bucket 50 49 0.98
+   wheelbase 56 51 0.91
+   upperarm 53 52 0.98
+   manual-earthrod 41 36 0.88
+   cabin 14 13 0.93
+
+Accuracy for spear-bucket-small: 80.00
+   forearm 48 24 0.50
+   attachment-bucket 50 36 0.72
+   wheelbase 50 44 0.88
+   upperarm 43 39 0.91
+   cabin 49 49 1.00
+
+Accuracy for earthrod1: 83.33
+   manual-earthrod 18 15 0.83
+
+Accuracy for earthrod2: 6.90
+   manual-earthrod 29 2 0.07
+
+Accuracy for spear-bucket-large: 85.83
+   forearm 50 40 0.80
+   attachment-bucket 47 27 0.57
+   wheelbase 50 50 1.00
+   upperarm 50 45 0.90
+   cabin 50 50 1.00
+
+Accuracy for crawl: 87.76
+   forearm 49 41 0.84
+   attachment-bucket 41 37 0.90
+   wheelbase 49 47 0.96
+   attachment-breaker 8 0 0.00
+   upperarm 49 43 0.88
+   cabin 49 47 0.96
+
+False positives: 12
+
+
+
+
+
+Testing model 2017-04-25_09.07.49:
+
+Accuracy for crouching: 95.56
+   manual-crouching 45 43 0.96
+
+Accuracy for spear-breaker: 84.65
+   forearm 49 26 0.53
+   wheelbase 50 50 1.00
+   attachment-breaker 50 44 0.88
+   upperarm 42 35 0.83
+   cabin 50 49 0.98
+
+Accuracy for manualexcavation: 83.33
+  manual-crouching 13 7 0.54
+  forearm 55 22 0.40
+  attachment-bucket 50 50 1.00
+  wheelbase 56 56 1.00
+  upperarm 53 50 0.94
+  manual-earthrod 41 38 0.93
+  cabin 14 12 0.86
+
+Accuracy for spear-bucket-small: 81.25
+  forearm 48 28 0.58
+  attachment-bucket 50 37 0.74
+  wheelbase 50 49 0.98
+  upperarm 43 32 0.74
+  cabin 49 49 1.00
+
+Accuracy for earthrod1: 88.89
+   manual-earthrod 18 16 0.89
+
+Accuracy for earthrod2: 0.00
+   manual-earthrod 29 0 0.00
+
+Accuracy for spear-bucket-large: 85.02
+  forearm 50 40 0.80
+  attachment-bucket 47 26 0.55
+  wheelbase 50 50 1.00
+  upperarm 50 44 0.88
+  cabin 50 50 1.00
+
+Accuracy for crawl: 86.12
+   forearm 49 41 0.84
+   attachment-bucket 41 34 0.83
+   wheelbase 49 45 0.92
+   attachment-breaker 8 0 0.00
+   upperarm 49 44 0.90
+   cabin 49 47 0.96
+
+False positives: 12
+
+
+
+
+
+Testing model 2017-04-25_09.07.49:
+
+Accuracy for crouching: 95.56
+   manual-crouching 45 43 0.96
+
+Accuracy for spear-breaker: 87.14
+   forearm 49 34 0.69
+   wheelbase 50 50 1.00
+   attachment-breaker 50 43 0.86
+   upperarm 42 33 0.79
+   cabin 50 50 1.00
+
+Accuracy for manualexcavation: 81.56
+   manual-crouching 13 5 0.38
+   forearm 55 29 0.53
+   attachment-bucket 50 45 0.90
+   wheelbase 56 55 0.98
+   upperarm 53 44 0.83
+   manual-earthrod 41 38 0.93
+   cabin 14 14 1.00
+
+Accuracy for spear-bucket-small: 78.33
+   forearm 48 25 0.52
+   attachment-bucket 50 35 0.70
+   wheelbase 50 49 0.98
+   upperarm 43 30 0.70
+   cabin 49 49 1.00
+
+Accuracy for earthrod1: 88.89
+  manual-earthrod 18 16 0.89
+
+Accuracy for earthrod2: 0.00
+  manual-earthrod 29 0 0.00
+
+Accuracy for spear-bucket-large: 83.40
+  forearm 50 38 0.76
+  attachment-bucket 47 25 0.53
+  wheelbase 50 50 1.00
+  upperarm 50 43 0.86
+  cabin 50 50 1.00
+
+Accuracy for crawl: 87.76
+  forearm 49 42 0.86
+  attachment-bucket 41 37 0.90
+  wheelbase 49 47 0.96
+  attachment-breaker 8 0 0.00
+  upperarm 49 42 0.86
+  cabin 49 47 0.96
+
+False positives: 14
+
+
+
+
+
+Testing model 2017-04-07_08.17.21:
+
+Accuracy for crouching: 95.56
+   manual-crouching 45 43 0.96
+
+Accuracy for spear-breaker: 85.48
+   forearm 49 33 0.67
+   wheelbase 50 50 1.00
+   attachment-breaker 50 41 0.82
+   upperarm 42 32 0.76
+   cabin 50 50 1.00
+
+Accuracy for manualexcavation: 88.30
+   manual-crouching 13 8 0.62
+   forearm 55 31 0.56
+   attachment-bucket 50 49 0.98
+   wheelbase 56 55 0.98
+   upperarm 53 52 0.98
+   manual-earthrod 41 41 1.00
+   cabin 14 13 0.93
+
+Accuracy for spear-bucket-small: 79.17
+   forearm 48 22 0.46
+   attachment-bucket 50 37 0.74
+   wheelbase 50 50 1.00
+   upperarm 43 32 0.74
+   cabin 49 49 1.00
+
+Accuracy for spear-bucket-large: 84.21
+   forearm 50 40 0.80
+   attachment-bucket 47 25 0.53
+   wheelbase 50 50 1.00
+   upperarm 50 43 0.86
+   cabin 50 50 1.00
+
+Accuracy for crawl: 85.71
+   forearm 49 38 0.78
+   attachment-bucket 41 34 0.83
+   wheelbase 49 48 0.98
+   attachment-breaker 8 0 0.00
+   upperarm 49 42 0.86
+   cabin 49 48 0.98
+
+False positives: 12
+
+
+
+
+
+Testing model 2017-04-07_08.17.21:
+
+Accuracy for spear-breaker: 84.65
+   forearm 49 33 0.67
+   wheelbase 50 50 1.00
+   attachment-breaker 50 38 0.76
+   upperarm 42 33 0.79
+   cabin 50 50 1.00
+
+Accuracy for spear-bucket-small: 74.17
+   forearm 48 19 0.40
+   attachment-bucket 50 33 0.66
+   wheelbase 50 49 0.98
+   upperarm 43 28 0.65
+   cabin 49 49 1.00
+
+Accuracy for spear-bucket-large: 83.40
+   forearm 50 38 0.76
+   attachment-bucket 47 25 0.53
+   wheelbase 50 50 1.00
+   upperarm 50 43 0.86
+   cabin 50 50 1.00
+
+Accuracy for crawl: 82.45
+   forearm 49 34 0.69
+   attachment-bucket 41 33 0.80
+   wheelbase 49 46 0.94
+   attachment-breaker 8 0 0.00
+   upperarm 49 41 0.84
+   cabin 49 48 0.98
+
+False positives: 8
+
+
+
+
+
+Testing model 2017-04-07_08.17.21:
+
+Accuracy for spear-breaker: 85.89
+   forearm 49 33 0.67
+   wheelbase 50 50 1.00
+   attachment-breaker 50 41 0.82
+   upperarm 42 33 0.79
+   cabin 50 50 1.00
+
+Accuracy for spear-bucket-small: 74.17
+   forearm 48 19 0.40
+   attachment-bucket 50 32 0.64
+   wheelbase 50 50 1.00
+   upperarm 43 28 0.65
+   cabin 49 49 1.00
+
+Accuracy for spear-bucket-large: 84.62
+   forearm 50 41 0.82
+   attachment-bucket 47 25 0.53
+   wheelbase 50 50 1.00
+   upperarm 50 43 0.86
+   cabin 50 50 1.00
+
+Accuracy for crawl: 82.04
+   forearm 49 31 0.63
+   attachment-bucket 41 31 0.76
+   wheelbase 49 47 0.96
+   attachment-breaker 8 0 0.00
+   upperarm 49 43 0.88
+   cabin 49 49 1.00
+
+False positives: 10
+
+
+
+
+
+Testing model 2017-03-31_11.36.30:
+
+Accuracy for spear-breaker: 83.40
+   forearm 49 30 0.61
+   wheelbase 50 50 1.00
+   attachment-breaker 50 32 0.64
+   upperarm 42 39 0.93
+   cabin 50 50 1.00
+
+Accuracy for spear-bucket-small: 79.58
+   forearm 48 27 0.56
+   attachment-bucket 50 36 0.72
+   wheelbase 50 47 0.94
+   upperarm 43 34 0.79
+   cabin 49 47 0.96
+
+Accuracy for spear-bucket-large: 87.85
+   forearm 50 42 0.84
+   attachment-bucket 47 28 0.60
+   wheelbase 50 50 1.00
+   upperarm 50 47 0.94
+   cabin 50 50 1.00
+
+Accuracy for crawl: 88.57
+   forearm 49 42 0.86
+   attachment-bucket 41 37 0.90
+   wheelbase 49 47 0.96
+   attachment-breaker 8 0 0.00
+   upperarm 49 42 0.86
+   cabin 49 49 1.00
+
+False positives: 20
