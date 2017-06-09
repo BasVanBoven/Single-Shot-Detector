@@ -33,6 +33,7 @@ source = np.genfromtxt('3dplot.csv', delimiter=',', dtype=float)
 plottable = np.zeros((5, 5), dtype=float)
 for row in source:
     plottable[(int(row[0])/2)-1,int(row[1])] += row[2]
+# divide by the number of train/test splits (currently 1)
 plottable /= 1
 
 # print output

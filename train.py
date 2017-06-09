@@ -19,6 +19,7 @@ from caffe.model_libs import *
 # handle input arguments
 parser = argparse.ArgumentParser(description='Train a Single Shot Detector.')
 parser.add_argument('builddir', help='build (timestamp only) that is to be trained')
+parser.add_argument('-t', '--testonly', default=False, action='store_true', help='do not train after testing')
 args = parser.parse_args()
 
 
@@ -102,7 +103,10 @@ remove_old_models = False
 # the database file for training data
 train_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_trainval')
 # the database file for testing data
-test_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_test')
+if args.testonly:
+    test_data = os.path.join(rootdir, 'builds', 'crawl', 'lmdb_test')
+else:
+    test_data = os.path.join(rootdir, 'builds', builddir, 'lmdb_test')
 # check which version of SSD we are running
 if os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd300.log')):
     assert(os.path.isfile(os.path.join(rootdir, 'builds', builddir, 'ssd512.log')) == False)
@@ -291,13 +295,16 @@ output_result_dir = os.path.join(rootdir, 'builds', builddir, 'output')
 
 # model definition files
 train_net_file = "{}/train.prototxt".format(save_dir)
-test_net_file = "{}/test.prototxt".format(save_dir)
+if args.testonly:
+    test_net_file = os.path.join(rootdir, 'builds', 'crawl', 'test.prototxt')
+else:
+    test_net_file = "{}/test.prototxt".format(save_dir)
 deploy_net_file = "{}/deploy.prototxt".format(save_dir)
 solver_file = "{}/solver.prototxt".format(save_dir)
 # snapshot prefix
 snapshot_prefix = "{}/{}".format(snapshot_dir, model_name)
 # job script path
-job_file = "{}/{}.sh".format(job_dir, model_name)
+job_file = "{}/{}.sh".format(os.path.join(rootdir, 'builds', builddir), model_name)
 
 
 # test image names and sizes
@@ -412,6 +419,12 @@ test_iter = int(math.ceil(float(num_test_image) / test_batch_size))
 
 
 # define solver object
+if args.testonly:
+    snapshot_after_train = False
+    test_interval = 1
+else:
+    snapshot_after_train = True
+    test_interval = 100
 solver_param = {
     # train parameters
     'base_lr': base_lr,
@@ -429,7 +442,7 @@ solver_param = {
     'solver_mode': solver_mode,
     'device_id': device_id,
     'debug_info': False,
-    'snapshot_after_train': True,
+    'snapshot_after_train': snapshot_after_train,
     # test parameters
     'test_iter': [test_iter],
     'test_interval': test_interval,

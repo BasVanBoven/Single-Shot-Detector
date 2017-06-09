@@ -61,7 +61,8 @@ output_test = os.path.join(output_traintest, 'test.csv')
 
 # determine which ssd build to use for the blacklist
 for current in sorted(os.listdir(ssd_rootdir)):
-    ssd_build = current
+    if current != 'crawl':
+        ssd_build = current
 if args.model != '':
     assert(os.path.exists(os.path.join(ssd_rootdir, args.model)))
     ssd_build = args.model

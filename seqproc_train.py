@@ -33,7 +33,7 @@ from sklearn.svm import SVC
 # handle input arguments
 parser = argparse.ArgumentParser(description='Train a Sequence Processor.')
 parser.add_argument('-d', '--debug', default=False, action='store_true', help='print debug output')
-parser.add_argument('-b', '--balance', default=True, action='store_true', help='balance training set')
+parser.add_argument('-b', '--balance', default=False, action='store_true', help='balance training set')
 parser.add_argument('-r', '--random', default=False, action='store_true', help='perform random classification')
 parser.add_argument('-a', '--augment', default=False, action='store_true', help='use augmented data for training')
 parser.add_argument('-e', '--estimator', type=int, default=3, help='estimator that is to be used')
