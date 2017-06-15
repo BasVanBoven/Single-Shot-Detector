@@ -424,7 +424,7 @@ if args.testonly:
     test_interval = 1
 else:
     snapshot_after_train = True
-    test_interval = 100
+    test_interval = 1000
 solver_param = {
     # train parameters
     'base_lr': base_lr,
