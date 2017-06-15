@@ -1,135 +1,157 @@
-120000
-I0606 07:56:02.972627   338 solver.cpp:540] class1: 0.906939
-I0606 07:56:02.977708   338 solver.cpp:540] class2: 0.868965
-I0606 07:56:02.979787   338 solver.cpp:540] class3: 0.899519
-I0606 07:56:02.982105   338 solver.cpp:540] class4: 0.906764
-I0606 07:56:02.991879   338 solver.cpp:540] class5: 0.859141
-I0606 07:56:02.992367   338 solver.cpp:540] class6: 0.903526
-I0606 07:56:02.993126   338 solver.cpp:540] class7: 0.846123
-I0606 07:56:02.993357   338 solver.cpp:540] class8: 0.98195
-I0606 07:56:02.993373   338 solver.cpp:546]     Test net output #0: detection_eval = 0.896616
+I0615 00:34:20.384400  3307 solver.cpp:433] Iteration 120000, Testing net (#0)
+I0615 00:34:20.384454  3307 net.cpp:693] Ignoring source layer mbox_loss
+I0615 00:37:15.256968  3307 solver.cpp:540] class1: 0.89367
+I0615 00:37:15.265391  3307 solver.cpp:540] class2: 0.779841
+I0615 00:37:15.270261  3307 solver.cpp:540] class3: 0.844556
+I0615 00:37:15.274718  3307 solver.cpp:540] class4: 0.903839
+I0615 00:37:15.295846  3307 solver.cpp:540] class5: 0.653149
+I0615 00:37:15.296778  3307 solver.cpp:540] class6: 0.743291
+I0615 00:37:15.298249  3307 solver.cpp:540] class7: 0.619108
+I0615 00:37:15.298699  3307 solver.cpp:540] class8: 0.941384
+I0615 00:37:15.298715  3307 solver.cpp:546]     Test net output #0: detection_eval = 0.797355
+I0615 00:37:15.298739  3307 solver.cpp:337] Optimization Done.
+I0615 00:37:15.298746  3307 caffe.cpp:254] Optimization Done.
 
+I0615 09:28:46.017138  3501 solver.cpp:433] Iteration 110000, Testing net (#0)
+I0615 09:28:46.035205  3501 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:31:40.575029  3501 solver.cpp:540] class1: 0.893319
+I0615 09:31:40.584077  3501 solver.cpp:540] class2: 0.784771
+I0615 09:31:40.589153  3501 solver.cpp:540] class3: 0.844648
+I0615 09:31:40.594049  3501 solver.cpp:540] class4: 0.904033
+I0615 09:31:40.617403  3501 solver.cpp:540] class5: 0.651919
+I0615 09:31:40.618358  3501 solver.cpp:540] class6: 0.746109
+I0615 09:31:40.619809  3501 solver.cpp:540] class7: 0.626057
+I0615 09:31:40.620255  3501 solver.cpp:540] class8: 0.939597
+I0615 09:31:40.620266  3501 solver.cpp:546]     Test net output #0: detection_eval = 0.798807
+I0615 09:31:42.080374  3501 solver.cpp:243] Iteration 110000, loss = 2.13167
 
-110000
-I0606 08:00:10.372193   361 solver.cpp:540] class1: 0.907128
-I0606 08:00:10.377140   361 solver.cpp:540] class2: 0.869782
-I0606 08:00:10.379248   361 solver.cpp:540] class3: 0.89932
-I0606 08:00:10.381613   361 solver.cpp:540] class4: 0.90656
-I0606 08:00:10.391347   361 solver.cpp:540] class5: 0.858286
-I0606 08:00:10.391870   361 solver.cpp:540] class6: 0.902707
-I0606 08:00:10.392673   361 solver.cpp:540] class7: 0.84409
-I0606 08:00:10.392925   361 solver.cpp:540] class8: 0.983039
-I0606 08:00:10.392943   361 solver.cpp:546]     Test net output #0: detection_eval = 0.896364
+I0615 09:33:13.848158  3524 solver.cpp:433] Iteration 100000, Testing net (#0)
+I0615 09:33:13.865856  3524 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:36:09.328271  3524 solver.cpp:540] class1: 0.893258
+I0615 09:36:09.337023  3524 solver.cpp:540] class2: 0.779886
+I0615 09:36:09.342016  3524 solver.cpp:540] class3: 0.844506
+I0615 09:36:09.346500  3524 solver.cpp:540] class4: 0.903542
+I0615 09:36:09.368302  3524 solver.cpp:540] class5: 0.645278
+I0615 09:36:09.369297  3524 solver.cpp:540] class6: 0.740586
+I0615 09:36:09.370847  3524 solver.cpp:540] class7: 0.625278
+I0615 09:36:09.371304  3524 solver.cpp:540] class8: 0.933282
+I0615 09:36:09.371320  3524 solver.cpp:546]     Test net output #0: detection_eval = 0.795702
+I0615 09:36:10.818306  3524 solver.cpp:243] Iteration 100000, loss = 2.72326
 
+I0615 09:36:37.892812  3547 solver.cpp:433] Iteration 90000, Testing net (#0)
+I0615 09:36:37.909795  3547 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:39:35.653296  3547 solver.cpp:540] class1: 0.895049
+I0615 09:39:35.662377  3547 solver.cpp:540] class2: 0.775401
+I0615 09:39:35.667623  3547 solver.cpp:540] class3: 0.840883
+I0615 09:39:35.672215  3547 solver.cpp:540] class4: 0.904198
+I0615 09:39:35.694082  3547 solver.cpp:540] class5: 0.645209
+I0615 09:39:35.695109  3547 solver.cpp:540] class6: 0.743687
+I0615 09:39:35.696710  3547 solver.cpp:540] class7: 0.615993
+I0615 09:39:35.697219  3547 solver.cpp:540] class8: 0.940974
+I0615 09:39:35.697235  3547 solver.cpp:546]     Test net output #0: detection_eval = 0.795174
+I0615 09:39:37.160411  3547 solver.cpp:243] Iteration 90000, loss = 3.02233
 
-100000
-I0606 08:02:11.398283   384 solver.cpp:540] class1: 0.907145
-I0606 08:02:11.403093   384 solver.cpp:540] class2: 0.868327
-I0606 08:02:11.405230   384 solver.cpp:540] class3: 0.899197
-I0606 08:02:11.407696   384 solver.cpp:540] class4: 0.906161
-I0606 08:02:11.417373   384 solver.cpp:540] class5: 0.856807
-I0606 08:02:11.417889   384 solver.cpp:540] class6: 0.903493
-I0606 08:02:11.418666   384 solver.cpp:540] class7: 0.844099
-I0606 08:02:11.418905   384 solver.cpp:540] class8: 0.986832
-I0606 08:02:11.418917   384 solver.cpp:546]     Test net output #0: detection_eval = 0.896508
+I0615 09:40:05.161770  3570 solver.cpp:433] Iteration 80000, Testing net (#0)
+I0615 09:40:05.180629  3570 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:43:03.283305  3570 solver.cpp:540] class1: 0.892718
+I0615 09:43:03.293000  3570 solver.cpp:540] class2: 0.783028
+I0615 09:43:03.297703  3570 solver.cpp:540] class3: 0.845231
+I0615 09:43:03.302695  3570 solver.cpp:540] class4: 0.903155
+I0615 09:43:03.325769  3570 solver.cpp:540] class5: 0.633338
+I0615 09:43:03.326836  3570 solver.cpp:540] class6: 0.705418
+I0615 09:43:03.328689  3570 solver.cpp:540] class7: 0.579113
+I0615 09:43:03.329310  3570 solver.cpp:540] class8: 0.936103
+I0615 09:43:03.329339  3570 solver.cpp:546]     Test net output #0: detection_eval = 0.784763
+I0615 09:43:04.788619  3570 solver.cpp:243] Iteration 80000, loss = 2.27644
 
+I0615 09:44:01.614320  3593 solver.cpp:433] Iteration 70000, Testing net (#0)
+I0615 09:44:01.632427  3593 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:46:59.261989  3593 solver.cpp:540] class1: 0.890636
+I0615 09:46:59.271041  3593 solver.cpp:540] class2: 0.747872
+I0615 09:46:59.276288  3593 solver.cpp:540] class3: 0.857709
+I0615 09:46:59.282548  3593 solver.cpp:540] class4: 0.901848
+I0615 09:46:59.305712  3593 solver.cpp:540] class5: 0.607976
+I0615 09:46:59.307246  3593 solver.cpp:540] class6: 0.717093
+I0615 09:46:59.308763  3593 solver.cpp:540] class7: 0.611981
+I0615 09:46:59.309396  3593 solver.cpp:540] class8: 0.915431
+I0615 09:46:59.309419  3593 solver.cpp:546]     Test net output #0: detection_eval = 0.781318
+I0615 09:47:00.772307  3593 solver.cpp:243] Iteration 70000, loss = 2.3731
 
-90000
-I0606 08:04:42.630343   407 solver.cpp:540] class1: 0.907155
-I0606 08:04:42.635068   407 solver.cpp:540] class2: 0.87036
-I0606 08:04:42.637111   407 solver.cpp:540] class3: 0.899482
-I0606 08:04:42.639477   407 solver.cpp:540] class4: 0.906166
-I0606 08:04:42.649165   407 solver.cpp:540] class5: 0.855573
-I0606 08:04:42.649623   407 solver.cpp:540] class6: 0.904261
-I0606 08:04:42.650347   407 solver.cpp:540] class7: 0.844046
-I0606 08:04:42.650550   407 solver.cpp:540] class8: 0.982458
-I0606 08:04:42.650560   407 solver.cpp:546]     Test net output #0: detection_eval = 0.896188
+I0615 09:47:36.144827  3616 solver.cpp:433] Iteration 60000, Testing net (#0)
+I0615 09:47:36.162246  3616 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:50:34.647805  3616 solver.cpp:540] class1: 0.892691
+I0615 09:50:34.657372  3616 solver.cpp:540] class2: 0.76916
+I0615 09:50:34.663095  3616 solver.cpp:540] class3: 0.830617
+I0615 09:50:34.668731  3616 solver.cpp:540] class4: 0.893126
+I0615 09:50:34.691845  3616 solver.cpp:540] class5: 0.660461
+I0615 09:50:34.693349  3616 solver.cpp:540] class6: 0.700513
+I0615 09:50:34.694939  3616 solver.cpp:540] class7: 0.573816
+I0615 09:50:34.695694  3616 solver.cpp:540] class8: 0.927544
+I0615 09:50:34.695709  3616 solver.cpp:546]     Test net output #0: detection_eval = 0.780991
+I0615 09:50:36.125844  3616 solver.cpp:243] Iteration 60000, loss = 3.10676
 
+I0615 09:53:12.552548  3639 solver.cpp:433] Iteration 50000, Testing net (#0)
+I0615 09:53:12.577229  3639 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:56:11.343533  3639 solver.cpp:540] class1: 0.892487
+I0615 09:56:11.352813  3639 solver.cpp:540] class2: 0.756277
+I0615 09:56:11.357777  3639 solver.cpp:540] class3: 0.839427
+I0615 09:56:11.363613  3639 solver.cpp:540] class4: 0.897314
+I0615 09:56:11.387094  3639 solver.cpp:540] class5: 0.62467
+I0615 09:56:11.388360  3639 solver.cpp:540] class6: 0.69472
+I0615 09:56:11.390224  3639 solver.cpp:540] class7: 0.558625
+I0615 09:56:11.391078  3639 solver.cpp:540] class8: 0.902774
+I0615 09:56:11.391093  3639 solver.cpp:546]     Test net output #0: detection_eval = 0.770787
+I0615 09:56:12.853968  3639 solver.cpp:243] Iteration 50000, loss = 2.83119
+I0615 09:56:12.854038  3639 solver.cpp:259]     Train net output #0: mbox_los
 
-80000
-I0606 08:06:44.657745   430 solver.cpp:540] class1: 0.906126
-I0606 08:06:44.662595   430 solver.cpp:540] class2: 0.856724
-I0606 08:06:44.664923   430 solver.cpp:540] class3: 0.895067
-I0606 08:06:44.667676   430 solver.cpp:540] class4: 0.907577
-I0606 08:06:44.677348   430 solver.cpp:540] class5: 0.848826
-I0606 08:06:44.677952   430 solver.cpp:540] class6: 0.903481
-I0606 08:06:44.678969   430 solver.cpp:540] class7: 0.827647
-I0606 08:06:44.679253   430 solver.cpp:540] class8: 0.907392
-I0606 08:06:44.679270   430 solver.cpp:546]     Test net output #0: detection_eval = 0.881605
+I0615 09:56:50.465211  3662 solver.cpp:433] Iteration 40000, Testing net (#0)
+I0615 09:56:50.482899  3662 net.cpp:693] Ignoring source layer mbox_loss
+I0615 09:59:49.412665  3662 solver.cpp:540] class1: 0.890486
+I0615 09:59:49.421888  3662 solver.cpp:540] class2: 0.735186
+I0615 09:59:49.428354  3662 solver.cpp:540] class3: 0.826995
+I0615 09:59:49.434183  3662 solver.cpp:540] class4: 0.900719
+I0615 09:59:49.455873  3662 solver.cpp:540] class5: 0.596315
+I0615 09:59:49.457633  3662 solver.cpp:540] class6: 0.646314
+I0615 09:59:49.459295  3662 solver.cpp:540] class7: 0.588667
+I0615 09:59:49.460345  3662 solver.cpp:540] class8: 0.921676
+I0615 09:59:49.460362  3662 solver.cpp:546]     Test net output #0: detection_eval = 0.763295
+I0615 09:59:50.921183  3662 solver.cpp:243] Iteration 40000, loss = 3.35964
 
-70000
-I0606 08:08:51.781859   453 solver.cpp:540] class1: 0.905807
-I0606 08:08:51.787047   453 solver.cpp:540] class2: 0.845892
-I0606 08:08:51.789024   453 solver.cpp:540] class3: 0.894862
-I0606 08:08:51.791702   453 solver.cpp:540] class4: 0.906919
-I0606 08:08:51.801646   453 solver.cpp:540] class5: 0.820139
-I0606 08:08:51.802126   453 solver.cpp:540] class6: 0.884334
-I0606 08:08:51.803112   453 solver.cpp:540] class7: 0.813739
-I0606 08:08:51.803505   453 solver.cpp:540] class8: 0.972378
-I0606 08:08:51.803519   453 solver.cpp:546]     Test net output #0: detection_eval = 0.880509
+I0615 10:02:36.389791  3685 solver.cpp:433] Iteration 30000, Testing net (#0)
+I0615 10:02:36.413806  3685 net.cpp:693] Ignoring source layer mbox_loss
+I0615 10:05:35.490242  3685 solver.cpp:540] class1: 0.890807
+I0615 10:05:35.497964  3685 solver.cpp:540] class2: 0.707505
+I0615 10:05:35.503916  3685 solver.cpp:540] class3: 0.823765
+I0615 10:05:35.509543  3685 solver.cpp:540] class4: 0.892632
+I0615 10:05:35.534114  3685 solver.cpp:540] class5: 0.542023
+I0615 10:05:35.534773  3685 solver.cpp:540] class6: 0.58246
+I0615 10:05:35.536314  3685 solver.cpp:540] class7: 0.518242
+I0615 10:05:35.537379  3685 solver.cpp:540] class8: 0.924967
+I0615 10:05:35.537397  3685 solver.cpp:546]     Test net output #0: detection_eval = 0.7353
+I0615 10:05:37.000897  3685 sgd_solver.cpp:138] Iteration 30000, lr = 2.5e-05
 
-60000
-I0606 08:11:55.243283   476 solver.cpp:540] class1: 0.906427
-I0606 08:11:55.248517   476 solver.cpp:540] class2: 0.826743
-I0606 08:11:55.250685   476 solver.cpp:540] class3: 0.891021
-I0606 08:11:55.253418   476 solver.cpp:540] class4: 0.906096
-I0606 08:11:55.263500   476 solver.cpp:540] class5: 0.813494
-I0606 08:11:55.263979   476 solver.cpp:540] class6: 0.894324
-I0606 08:11:55.264753   476 solver.cpp:540] class7: 0.805742
-I0606 08:11:55.265049   476 solver.cpp:540] class8: 0.977008
-I0606 08:11:55.265064   476 solver.cpp:546]     Test net output #0: detection_eval = 0.877607
+I0615 10:06:26.754055  3708 solver.cpp:433] Iteration 20000, Testing net (#0)
+I0615 10:06:26.771080  3708 net.cpp:693] Ignoring source layer mbox_loss
+I0615 10:09:26.707653  3708 solver.cpp:540] class1: 0.892781
+I0615 10:09:26.715497  3708 solver.cpp:540] class2: 0.686182
+I0615 10:09:26.721308  3708 solver.cpp:540] class3: 0.797202
+I0615 10:09:26.726927  3708 solver.cpp:540] class4: 0.896457
+I0615 10:09:26.751438  3708 solver.cpp:540] class5: 0.496062
+I0615 10:09:26.752466  3708 solver.cpp:540] class6: 0.512668
+I0615 10:09:26.753912  3708 solver.cpp:540] class7: 0.464739
+I0615 10:09:26.755424  3708 solver.cpp:540] class8: 0.87235
+I0615 10:09:26.755437  3708 solver.cpp:546]     Test net output #0: detection_eval = 0.702305
+I0615 10:09:28.192404  3708 solver.cpp:243] Iteration 20000, loss = 3.36471
 
-50000
-I0606 08:13:45.547041   499 solver.cpp:540] class1: 0.905771
-I0606 08:13:45.552456   499 solver.cpp:540] class2: 0.82281
-I0606 08:13:45.555002   499 solver.cpp:540] class3: 0.886743
-I0606 08:13:45.557353   499 solver.cpp:540] class4: 0.905389
-I0606 08:13:45.567360   499 solver.cpp:540] class5: 0.804694
-I0606 08:13:45.567860   499 solver.cpp:540] class6: 0.879179
-I0606 08:13:45.568639   499 solver.cpp:540] class7: 0.796219
-I0606 08:13:45.568954   499 solver.cpp:540] class8: 0.947864
-I0606 08:13:45.568971   499 solver.cpp:546]     Test net output #0: detection_eval = 0.868584
-
-40000
-I0606 08:15:31.699751   522 solver.cpp:540] class1: 0.904936
-I0606 08:15:31.704816   522 solver.cpp:540] class2: 0.794091
-I0606 08:15:31.707612   522 solver.cpp:540] class3: 0.882287
-I0606 08:15:31.709990   522 solver.cpp:540] class4: 0.905314
-I0606 08:15:31.719328   522 solver.cpp:540] class5: 0.78574
-I0606 08:15:31.719691   522 solver.cpp:540] class6: 0.89563
-I0606 08:15:31.720449   522 solver.cpp:540] class7: 0.778765
-I0606 08:15:31.720832   522 solver.cpp:540] class8: 0.97004
-I0606 08:15:31.720847   522 solver.cpp:546]     Test net output #0: detection_eval = 0.8646
-
-30000
-I0606 08:17:24.509107   545 solver.cpp:540] class1: 0.9041
-I0606 08:17:24.513483   545 solver.cpp:540] class2: 0.766144
-I0606 08:17:24.516000   545 solver.cpp:540] class3: 0.860702
-I0606 08:17:24.518821   545 solver.cpp:540] class4: 0.902411
-I0606 08:17:24.528776   545 solver.cpp:540] class5: 0.743249
-I0606 08:17:24.529280   545 solver.cpp:540] class6: 0.886653
-I0606 08:17:24.529978   545 solver.cpp:540] class7: 0.744281
-I0606 08:17:24.530673   545 solver.cpp:540] class8: 0.959574
-I0606 08:17:24.530694   545 solver.cpp:546]     Test net output #0: detection_eval = 0.845889
-
-20000
-I0606 08:19:17.053975   568 solver.cpp:540] class1: 0.90287
-I0606 08:19:17.058396   568 solver.cpp:540] class2: 0.730188
-I0606 08:19:17.061472   568 solver.cpp:540] class3: 0.850171
-I0606 08:19:17.064286   568 solver.cpp:540] class4: 0.903449
-I0606 08:19:17.074194   568 solver.cpp:540] class5: 0.689889
-I0606 08:19:17.074529   568 solver.cpp:540] class6: 0.806171
-I0606 08:19:17.075361   568 solver.cpp:540] class7: 0.663999
-I0606 08:19:17.076169   568 solver.cpp:540] class8: 0.903479
-I0606 08:19:17.076185   568 solver.cpp:546]     Test net output #0: detection_eval = 0.806277
-
-10000
-I0606 08:23:38.838019   591 solver.cpp:540] class1: 0.890043
-I0606 08:23:38.840690   591 solver.cpp:540] class2: 0.584912
-I0606 08:23:38.843327   591 solver.cpp:540] class3: 0.775416
-I0606 08:23:38.846709   591 solver.cpp:540] class4: 0.893418
-I0606 08:23:38.857388   591 solver.cpp:540] class5: 0.531257
-I0606 08:23:38.857712   591 solver.cpp:540] class6: 0.622132
-I0606 08:23:38.858350   591 solver.cpp:540] class7: 0.521849
-I0606 08:23:38.859335   591 solver.cpp:540] class8: 0.792789
-I0606 08:23:38.859350   591 solver.cpp:546]     Test net output #0: detection_eval = 0.701477
+I0615 10:10:48.460021  3731 solver.cpp:433] Iteration 10000, Testing net (#0)
+I0615 10:10:48.477643  3731 net.cpp:693] Ignoring source layer mbox_loss
+I0615 10:13:49.398882  3731 solver.cpp:540] class1: 0.883594
+I0615 10:13:49.403825  3731 solver.cpp:540] class2: 0.49677
+I0615 10:13:49.410590  3731 solver.cpp:540] class3: 0.737103
+I0615 10:13:49.417377  3731 solver.cpp:540] class4: 0.87373
+I0615 10:13:49.442610  3731 solver.cpp:540] class5: 0.399697
+I0615 10:13:49.443123  3731 solver.cpp:540] class6: 0.326647
+I0615 10:13:49.444646  3731 solver.cpp:540] class7: 0.379098
+I0615 10:13:49.445911  3731 solver.cpp:540] class8: 0.760063
+I0615 10:13:49.445930  3731 solver.cpp:546]     Test net output #0: detection_eval = 0.607088
+I0615 10:13:50.919256  3731 solver.cpp:243] Iteration 10000, loss = 3.73215

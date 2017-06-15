@@ -1,0 +1,11 @@
+Best version of the model, tested on crawl. This is the non-broken experiment
+
+I0615 09:24:05.554407  3434 solver.cpp:540] class1: 0.991266
+I0615 09:24:05.563086  3434 solver.cpp:540] class2: 0.919237
+I0615 09:24:05.570161  3434 solver.cpp:540] class3: 0.887516
+I0615 09:24:05.574335  3434 solver.cpp:540] class4: 0.989328
+I0615 09:24:05.591372  3434 solver.cpp:540] class5: 0.827152
+I0615 09:24:05.591845  3434 solver.cpp:540] class6: 0.63151
+I0615 09:24:05.591884  3434 solver.cpp:540] class7: 0
+I0615 09:24:05.591902  3434 solver.cpp:540] class8: 0
+I0615 09:24:05.591912  3434 solver.cpp:546]     Test net output #0: detection_eval = 0.655751
